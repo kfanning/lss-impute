@@ -24,9 +24,9 @@ def extract_nn(cat1, cat2=None, nmax=1):
         retcat[f'angdist_n{i-shift}'] = d2d.radian
     return retcat
 
-def split_obs_missed(fullcat, compcat, reg='N'):
+def split_obs_missed(fullcat, compcat, region='N'):
     keep_comp = ['TARGETID','Z', 'WEIGHT', 'NZ',' WEIGHT_FKP']
-    fullreg = fullcat[fullcat['PHOTSYS']==reg]
+    fullreg = fullcat[fullcat['PHOTSYS']==region]
     fullreg = join(fullreg, compcat[keep_comp], keys='TARGETID', join_type='outer')
     missed = fullreg[fullreg['ZWARN'] != 0]
     observ = fullreg[fullreg['ZWARN'] == 0]
