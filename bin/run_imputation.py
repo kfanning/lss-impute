@@ -18,9 +18,9 @@ stagedir = dirs.get_stagedir(uargs.survey, uargs.version)
 impute_dir = dirs.get_catdir('y1model', uargs.version)
 
 #read catalogs (using complete and full catalogs then splitting later)
-clusn = Table.read(os.path.join([catdir, f'{uargs.tracer}_complete_N_clustering.dat.fits']))
-cluss = Table.read(os.path.join([catdir, f'{uargs.tracer}_complete_S_clustering.dat.fits']))
-full =  Table.read(os.path.join([catdir, f'{uargs.tracer}_full.dat.fits']))
+clusn = Table.read(os.path.join(catdir, f'{uargs.tracer}_complete_N_clustering.dat.fits'))
+cluss = Table.read(os.path.join(catdir, f'{uargs.tracer}_complete_S_clustering.dat.fits'))
+full =  Table.read(os.path.join(catdir, f'{uargs.tracer}_full.dat.fits'))
 
 #get missed and observed for each region
 obsn, missn = cat.split_obs_missed(full, clusn, region='N')
@@ -40,5 +40,5 @@ impn_cat = impn.run()
 imps = impute.ImputeModel(obs_nncat, mis_nncat_s)
 imps_cat = imps.run()
 
-imps_cat.write(os.path.join([impute_dir, f'{uargs.tracer}_S_clustering.dat.fits']))
-imps_cat.write(os.path.join([impute_dir, f'{uargs.tracer}_N_clustering.dat.fits']))
+imps_cat.write(os.path.join(impute_dir, f'{uargs.tracer}_S_clustering.dat.fits'))
+imps_cat.write(os.path.join(impute_dir, f'{uargs.tracer}_N_clustering.dat.fits'))

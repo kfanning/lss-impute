@@ -13,7 +13,7 @@ def get_catdir(survey, version):
     for imputation survey is impute type, version is 
     '''
     version=str(version) #often passed as an int
-    return os.path.join([basedir, 'impute', 'catalogs', survey, version])
+    return os.path.join(basedir, 'impute', 'catalogs', survey, version)
 
 def get_stagedir(survey, version):
     '''
@@ -23,4 +23,4 @@ def get_stagedir(survey, version):
     that aren't used for statistics but are for others 
     '''
     version=str(version) #often passed as an int
-    return os.path.join([basedir, 'impute', 'staging', survey, version])
+    return os.path.join(basedir, 'impute', 'staging', survey, version)
