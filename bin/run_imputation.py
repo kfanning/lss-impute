@@ -41,4 +41,4 @@ imps = impute.ImputeModel(obs_nncat, mis_nncat_s)
 imps_cat = imps.run()
 
 imps_cat.write(os.path.join(impute_dir, f'{uargs.tracer}_S_clustering.dat.fits'))
-imps_cat.write(os.path.join(impute_dir, f'{uargs.tracer}_N_clustering.dat.fits'))
+impn_cat.write(os.path.join(impute_dir, f'{uargs.tracer}_N_clustering.dat.fits'))
