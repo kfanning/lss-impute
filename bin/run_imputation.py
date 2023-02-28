@@ -5,7 +5,7 @@ from lssimpute import dirs, cat, impute
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--tracer', '-t', default='LRG', help='Which LSS tracer catalogs to run on (LRG, ELG, QSO)')
-parser.add_argument('--survey', '-s', defualt='y1mock', help='Survey to use (typically main or y1mock)')
+parser.add_argument('--survey', '-s', default='y1mock', help='Survey to use (typically main or y1mock)')
 parser.add_argument('--version', '-v', default=0, help='catalog version, for mocks this is mock number')
 # add dir management
 # catdir (for base catalogs for reading, no writing)
