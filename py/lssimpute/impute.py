@@ -203,12 +203,12 @@ class ImputeModel():
                         axs[1].plot(csample_x, ckde_y, 'r-')
                     axs[1].set_xlabel('Z diff')
                 
-            #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
-            #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
-            return mistab
+        #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
+        #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
+        return mistab
 
-        def run(self):
-            self.bin_angular()
-            self.bin_z()
-            mistab = self.impute()
-            return mistab
+    def run(self):
+        self.bin_angular()
+        self.bin_z()
+        mistab = self.impute()
+        return mistab
