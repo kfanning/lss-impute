@@ -29,9 +29,9 @@ class ImputeModel():
         maxbin = np.max(self.misscat['angdist_n0'])#np.min((np.max(tab['angdist_n0']), np.max(clusN['angdist_n1'])))
         print(maxbin)
         nbins = 18
-        selectclus = self.cluscat[self.cluscat['angdist_n1'] < maxbin]
+        selectclus = self.cluscat[self.cluscat['angdist_n0'] < maxbin]
         self.ang_misbins, self.ang_edges = np.histogram(self.misscat['angdist_n0'], range=(0,maxbin), bins=nbins)
-        self.ang_clusbins, clusedges = np.histogram(selectclus['angdist_n1'], range=(0,maxbin), bins=nbins)
+        self.ang_clusbins, clusedges = np.histogram(selectclus['angdist_n0'], range=(0,maxbin), bins=nbins)
         # merge bins 6,7 and 8-14
         mergebin = 6
         maskb = np.ones(len(self.ang_misbins))
@@ -70,13 +70,13 @@ class ImputeModel():
     def bin_z(self):
         #nn z binning
         # loooking at nn redshift
-        maxbin = max([np.max(self.misscat['z_n0']), np.max(self.cluscat['z_n1'])]) #1.1
-        minbin = min([np.min(self.misscat['z_n0']), np.min(self.cluscat['z_n1'])]) #0.4# might want to use range of all data?
+        maxbin = max([np.max(self.misscat['z_n0']), np.max(self.cluscat['z_n0'])]) #1.1
+        minbin = min([np.min(self.misscat['z_n0']), np.min(self.cluscat['z_n0'])]) #0.4# might want to use range of all data?
         nbins = 15#18 #20
-        selectclus2 = self.cluscat[(self.cluscat['z_n1'] < maxbin) & (self.cluscat['z_n1'] > minbin)]
+        selectclus2 = self.cluscat[(self.cluscat['z_n0'] < maxbin) & (self.cluscat['z_n0'] > minbin)]
         ntot = len(selectclus2['Z']) + len(self.misscat['Z'])
         self.z_misbins, self.z_edges = np.histogram(self.misscat['z_n0'], range=(minbin,maxbin), bins=nbins)
-        self.z_clusbins, _ = np.histogram(selectclus2['z_n1'], range=(minbin,maxbin), bins=nbins)
+        self.z_clusbins, _ = np.histogram(selectclus2['z_n0'], range=(minbin,maxbin), bins=nbins)
         # merge first + last bins
         num_merge = 3#4
         mask = np.ones(len(self.z_misbins))
