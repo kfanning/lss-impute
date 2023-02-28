@@ -13,6 +13,8 @@ def extract_nn(cat1, cat2=None, nmax=1):
         coord2 = SkyCoord(ra=cat2['RA']*u.degree, dec=cat2['DEC']*u.degree)
     retcat = cat1.copy()
     shift = 1 if cat2 is None else 0 # if no cat 2 self compare and 1st nn is self
+    if cat2 is None:
+        cat2 = cat1 # this is by ref - so cleans up code below. cannot check for None now!
     store_tree = True if nmax > 1 else False
     for i in range(0+shift, nmax+shift):
         idx, d2d, d3d = match_coordinates_sky(coord1, coord2, nthneighbor=i+1, storekdtree=store_tree)
