@@ -200,7 +200,7 @@ class ImputeModel():
                 zdiff_new = select_miss['Z'] - select_miss['z_n0']
                 miss_clus_mask = (zdiff_new < backg) & (zdiff_new > -1*backg)
                 # data collection
-                binnum.append(i+j)
+                binnum.append(i+(j*(len(self.zedges)-1))) 
                 minzs.append(minz)
                 maxzs.append(maxz)
                 minangs.append(mindist)
