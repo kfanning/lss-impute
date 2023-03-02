@@ -123,7 +123,7 @@ class ImputeModel():
         mistab['randnum'] = np.random.random_sample(len(mistab))
         mistab['Z'] = np.zeros(len(mistab), dtype=np.float64) - 1
         # data storage
-        names = ['BIN_NUM', 'MIN_Z', 'MAX_Z', 'MIN_ANGDIST', 'MAX_ANGDIST', 'CLUSTERED_FRAC']
+        names = ['BIN_NUM', 'MIN_Z', 'MAX_Z', 'MIN_ANGDIST', 'MAX_ANGDIST', 'CLUSTERED_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK']
         binnum = []
         minzs = []
         maxzs = []
