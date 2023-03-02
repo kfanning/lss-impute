@@ -196,7 +196,8 @@ class ImputeModel():
                         mistab['Z'][mask & clus] = mistab[mask & clus]['z_n0'] + ckde.resample(np.count_nonzero(mask & clus))[0]
                     mistab['Z'][mask & back] = mistab[mask & back]['z_n0'] + bkde.resample(np.count_nonzero(mask & back))[0]
 
-                zdiff_new = mistab['Z'] - mistab['z_n0']
+                select_miss = mistab[mask]
+                zdiff_new = select_miss['Z'] - select_miss['z_n0']
                 miss_clus_mask = (zdiff_new < backg) & (zdiff_new > -1*backg)
                 # data collection
                 binnum.append(i+j)
@@ -207,8 +208,8 @@ class ImputeModel():
                 nominalfrac.append(clus_frac)
                 n_obsclus.append(len(clus_clus))
                 n_obsback.append(len(clus_back))
-                n_misclus.append(len(mistab[miss_clus_mask]))
-                n_misback.append(len(mistab[~miss_clus_mask]))
+                n_misclus.append(len(select_miss[miss_clus_mask]))
+                n_misback.append(len(select_miss[~miss_clus_mask]))
 
                 if False: #((i % 5) == 0) | (i > 0): 
                     fig, axs = plt.subplots(1,2)#, sharey=True)
