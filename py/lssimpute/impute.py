@@ -122,6 +122,19 @@ class ImputeModel():
         mistab = self.misscat.copy()
         mistab['randnum'] = np.random.random_sample(len(mistab))
         mistab['Z'] = np.zeros(len(mistab), dtype=np.float64) - 1
+        # data storage
+        names = ['BIN_NUM', 'MIN_Z', 'MAX_Z', 'MIN_ANGDIST', 'MAX_ANGDIST', 'CLUSTERED_FRAC']
+        binnum = []
+        minzs = []
+        maxzs = []
+        minangs = []
+        maxangs = []
+        nominalfrac = []
+        n_obsclus = []
+        n_obsback = []
+        n_misclus = []
+        n_misback = []
+
         for j in range(len(self.ang_edges)-1): #misedges is nn_angdist
             for i in range(len(self.z_edges)-1): #misedges2 is nn_z
                 maxz = self.z_edges[i+1]
@@ -183,6 +196,20 @@ class ImputeModel():
                         mistab['Z'][mask & clus] = mistab[mask & clus]['z_n0'] + ckde.resample(np.count_nonzero(mask & clus))[0]
                     mistab['Z'][mask & back] = mistab[mask & back]['z_n0'] + bkde.resample(np.count_nonzero(mask & back))[0]
 
+                zdiff_new = mistab['Z'] - mistab['z_n0']
+                miss_clus_mask = (zdiff_new < backg) & (zdiff_new > -1*backg)
+                # data collection
+                binnum.append(i+j)
+                minzs.append(minz)
+                maxzs.append(maxz)
+                minangs.append(mindist)
+                maxangs.append(maxdist)
+                nominalfrac.append(clus_frac)
+                n_obsclus.append(len(clus_clus))
+                n_obsback.append(len(clus_back))
+                n_misclus.append(len(mistab[miss_clus_mask]))
+                n_misback.append(len(mistab[~miss_clus_mask]))
+
                 if False: #((i % 5) == 0) | (i > 0): 
                     fig, axs = plt.subplots(1,2)#, sharey=True)
                     fig.dpi=200
@@ -202,7 +229,8 @@ class ImputeModel():
                     if has_clustered:
                         axs[1].plot(csample_x, ckde_y, 'r-')
                     axs[1].set_xlabel('Z diff')
-                
+        
+        self.impute_details = Table([binnum, minzs, maxzs, minangs, maxangs, nominalfrac, n_obsclus, n_obsback, n_misclus, n_misback], names=names)
         #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
