@@ -196,7 +196,7 @@ class ImputeModel():
                         mistab['Z'][mask & clus] = mistab[mask & clus]['z_n0'] + ckde.resample(np.count_nonzero(mask & clus))[0]
                     mistab['Z'][mask & back] = mistab[mask & back]['z_n0'] + bkde.resample(np.count_nonzero(mask & back))[0]
 
-                select_miss = mistab[mask]
+                select_miss = mistab[(mistab['z_n0'] < maxz) & (mistab['z_n0'] > minz) & (mistab['angdist_n0'] > mindist) & (mistab['angdist_n0'] < maxdist)]
                 zdiff_new = select_miss['Z'] - select_miss['z_n0']
                 miss_clus_mask = (zdiff_new < backg) & (zdiff_new > -1*backg)
                 # data collection
