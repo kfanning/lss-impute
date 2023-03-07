@@ -8,7 +8,7 @@ parser.add_argument('--tracer', '-t', default='LRG', help='Which LSS tracer cata
 parser.add_argument('--survey', '-s', default='y1mock', help='Survey to use (typically main or y1mock)')
 parser.add_argument('--version', '-v', default=0, help='catalog version, for mocks this is mock number')
 parser.add_argument('--impversion', '-i', default=None, help='override version for imputation, default None == same as version')
-parser.add_argument('--nobackground', '-nb', default=False, help='Skip imputing "background" (close to random) galaxies.')
+parser.add_argument('--nobackground', '-nb', action='store_true', help='Skip imputing "background" (close to random) galaxies.')
 # add dir management
 # catdir (for base catalogs for reading, no writing)
 # temp dir (intermediate files like logging, nn cats, etc)
