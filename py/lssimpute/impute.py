@@ -117,7 +117,7 @@ class ImputeModel():
             plt.show()
         return fig 
 
-    def impute(self, clusfrac_override=None):
+    def impute(self, clusfrac_override=None, skip_background=False):
         #impute model
         mistab = self.misscat.copy()
         mistab['randnum'] = np.random.random_sample(len(mistab))
@@ -192,9 +192,12 @@ class ImputeModel():
                     mask = (mistab['z_n0'] < maxz) & (mistab['z_n0'] > minz) & (mistab['angdist_n0'] > mindist) & (mistab['angdist_n0'] < maxdist) & ((mistab['Z'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
                     back = (mistab['randnum'] > clus_frac)
                     if has_clustered:
-                        clus = (mistab['randnum'] < clus_frac)
+                        clus = (mistab['randnum'] <= clus_frac)
                         mistab['Z'][mask & clus] = mistab[mask & clus]['z_n0'] + ckde.resample(np.count_nonzero(mask & clus))[0]
-                    mistab['Z'][mask & back] = mistab[mask & back]['z_n0'] + bkde.resample(np.count_nonzero(mask & back))[0]
+                    if skip_background:
+                        mask = mask & (~back)
+                    else:
+                        mistab['Z'][mask & back] = mistab[mask & back]['z_n0'] + bkde.resample(np.count_nonzero(mask & back))[0]
 
                 select_miss = mistab[(mistab['z_n0'] < maxz) & (mistab['z_n0'] > minz) & (mistab['angdist_n0'] > mindist) & (mistab['angdist_n0'] < maxdist)]
                 zdiff_new = select_miss['Z'] - select_miss['z_n0']
