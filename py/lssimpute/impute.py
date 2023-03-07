@@ -192,7 +192,7 @@ class ImputeModel():
                     mask = (mistab['z_n0'] < maxz) & (mistab['z_n0'] > minz) & (mistab['angdist_n0'] > mindist) & (mistab['angdist_n0'] < maxdist) & ((mistab['Z'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
                     back = (mistab['randnum'] > clus_frac)
                     if has_clustered:
-                        clus = (mistab['randnum'] <= clus_frac)
+                        clus = (mistab['randnum'] < clus_frac)
                         mistab['Z'][mask & clus] = mistab[mask & clus]['z_n0'] + ckde.resample(np.count_nonzero(mask & clus))[0]
                     if skip_background:
                         mask = mask & (~back)
@@ -239,7 +239,7 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
-    def run(self, clusfrac_override=False, skip_background=False):
+    def run(self, clusfrac_override=None, skip_background=False):
         self.bin_angular()
         self.bin_z()
         mistab = self.impute(clusfrac_override=clusfrac_override, skip_background=skip_background)

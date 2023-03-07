@@ -42,9 +42,9 @@ obs_nncat = cat.extract_nn(obs)
 
 #run imputation
 impn = impute.ImputeModel(obs_nncat, mis_nncat_n)
-impn_cat = impn.run()
+impn_cat = impn.run(skip_backbground=uargs.nobackground)
 imps = impute.ImputeModel(obs_nncat, mis_nncat_s)
-imps_cat = imps.run()
+imps_cat = imps.run(skip_backbground=uargs.nobackground)
 
 imps.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_S_impute_details.fits'))
 impn.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_N_impute_details.fits'))
