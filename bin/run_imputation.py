@@ -8,6 +8,7 @@ parser.add_argument('--tracer', '-t', default='LRG', help='Which LSS tracer cata
 parser.add_argument('--survey', '-s', default='y1mock', help='Survey to use (typically main or y1mock)')
 parser.add_argument('--version', '-v', default=0, help='catalog version, for mocks this is mock number')
 parser.add_argument('--impversion', '-i', default=None, help='override version for imputation, default None == same as version')
+parser.add_argument('--nobackground', '-nb', default=False, help='Skip imputing "background" (close to random) galaxies.')
 # add dir management
 # catdir (for base catalogs for reading, no writing)
 # temp dir (intermediate files like logging, nn cats, etc)
@@ -17,9 +18,9 @@ uargs = parser.parse_args()
 catdir = dirs.get_catdir(uargs.survey, uargs.version)
 stagedir = dirs.get_stagedir(uargs.survey, uargs.version)
 if uargs.impversion is not None:
-	impver = uargs.impversion
+    impver = uargs.impversion
 else:
-	impver = uargs.version
+    impver = uargs.version
 impute_dir = dirs.get_catdir('y1model', impver)
 
 #read catalogs (using complete and full catalogs then splitting later)

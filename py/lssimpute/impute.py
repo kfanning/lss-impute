@@ -239,8 +239,8 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
-    def run(self):
+    def run(self, clusfrac_override=False, skip_background=False):
         self.bin_angular()
         self.bin_z()
-        mistab = self.impute()
+        mistab = self.impute(clusfrac_override=clusfrac_override, skip_background=skip_background)
         return mistab
