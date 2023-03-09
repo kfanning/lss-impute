@@ -181,10 +181,17 @@ def read_clustering_positions_weights(distance, zlim=(0., np.inf), weight_type='
         for reg in region:
             if kwargs.get('calc_full', False):
                 cctype='full'
-            cat_fns = catalog_fn(ctype='clustering', name=name, region=reg, **kwargs)
+            if name == 'random' and rand_override and imp:
+                kwargs2 = kwargs.copy()
+                olddir = Path(kwargs['cat_dir'])
+                kwargs2['cat_dir'] = os.path.join(olddir.parents[1], kwargs['impute_type'], kwargs['impute_number'])
+                cat_fns = catalog_fn(ctype='clustering', name=name, region=reg, **kwargs2)
+            else:
+                cat_fns = catalog_fn(ctype='clustering', name=name, region=reg, **kwargs)
             #logger.info('Loading {}.'.format(cat_fns))
             isscalar = not isinstance(cat_fns, (tuple, list))
             imp = kwargs.get('impute_type', None) is not None #check if we have imputation to do
+            rand_override = kwargs.get('random_override', None) is not None
             if isscalar:
                 cat_fns = [cat_fns]
             if name == 'data' and imp:
@@ -543,6 +550,8 @@ if __name__ == '__main__':
     # KF added args
     parser.add_argument("--nimpute", help="Imputation number prefix, defaults to None or no imputation", default=None)
     parser.add_argument("--impute_type", help="Imputation type, defaults to None or no imputation", default=None)
+    parser.add_argument("--random_override", help="Override the random directory to read from the imputation directory, default no", default=None)
+
 
     setup_logging()
     args = parser.parse_args()
@@ -553,6 +562,9 @@ if __name__ == '__main__':
         impute_number = None
         impute_type = None
 
+    random_override = args.random_override
+    if random_override in [None, 'None', 'none']:
+        random_override = None
 
     mpicomm, mpiroot = None, None
     if True:#args.mpi:
@@ -584,7 +596,7 @@ if __name__ == '__main__':
             raise ValueError('Provide <= 2 tracers!')
     if tracer2 == tracer:
         tracer2 = None # otherwise counting of self-pairs
-    catalog_kwargs = dict(tracer=tracer, tracer2=tracer2, survey=args.survey, cat_dir=cat_dir, rec_type=args.rec_type, impute_type=impute_type, impute_number=impute_number) # survey required for zdone
+    catalog_kwargs = dict(tracer=tracer, tracer2=tracer2, survey=args.survey, cat_dir=cat_dir, rec_type=args.rec_type, impute_type=impute_type, impute_number=impute_number, random_override=random_override) # survey required for zdone
     distance = TabulatedDESI().comoving_radial_distance
 
     regions = args.region
