@@ -25,7 +25,7 @@ impute_dir = dirs.get_catdir('y1model', impver)
 
 #read catalogs (using impute and full to calc downsample amount)
 impn = Table.read(os.path.join(impute_dir, f'{uargs.tracer}_N_clustering.dat.fits'))
-imps = Table.read(os.path.join(impute_cd dir, f'{uargs.tracer}_S_clustering.dat.fits'))
+imps = Table.read(os.path.join(impute_dir, f'{uargs.tracer}_S_clustering.dat.fits'))
 full =  Table.read(os.path.join(catdir, f'{uargs.tracer}_full.dat.fits'))
 
 # -1 Z in impute means NO imputation
