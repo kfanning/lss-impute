@@ -181,6 +181,7 @@ def read_clustering_positions_weights(distance, zlim=(0., np.inf), weight_type='
         for reg in region:
             if kwargs.get('calc_full', False):
                 cctype='full'
+            rand_override = kwargs.get('random_override', None) is not None
             if name == 'random' and rand_override and imp:
                 kwargs2 = kwargs.copy()
                 olddir = Path(kwargs['cat_dir'])
@@ -191,7 +192,6 @@ def read_clustering_positions_weights(distance, zlim=(0., np.inf), weight_type='
             #logger.info('Loading {}.'.format(cat_fns))
             isscalar = not isinstance(cat_fns, (tuple, list))
             imp = kwargs.get('impute_type', None) is not None #check if we have imputation to do
-            rand_override = kwargs.get('random_override', None) is not None
             if isscalar:
                 cat_fns = [cat_fns]
             if name == 'data' and imp:
