@@ -46,5 +46,5 @@ randcatn = Table.read(os.path.join(catdir, f'{uargs.tracer}_N_0_clustering.ran.f
 randcats = Table.read(os.path.join(catdir, f'{uargs.tracer}_S_0_clustering.ran.fits'))
 new_randn = cat.downsample_randoms_by_ntile(randcatn, comp_ntile)
 new_rands = cat.downsample_randoms_by_ntile(randcats, comp_ntile)
-new_rands.write(os.path.join(impute_dir), f'{uargs.tracer}_S_0_clustering.ran.fits', format='fits')
-new_randn.write(os.path.join(impute_dir), f'{uargs.tracer}_N_0_clustering.ran.fits', format='fits')
+new_rands.write(os.path.join(impute_dir, f'{uargs.tracer}_S_0_clustering.ran.fits'), format='fits')
+new_randn.write(os.path.join(impute_dir, f'{uargs.tracer}_N_0_clustering.ran.fits'), format='fits')
