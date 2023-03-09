@@ -182,7 +182,7 @@ def read_clustering_positions_weights(distance, zlim=(0., np.inf), weight_type='
             if kwargs.get('calc_full', False):
                 cctype='full'
             rand_override = kwargs.get('random_override', None) is not None
-            if name == 'random' and rand_override and imp:
+            if name == 'randoms' and rand_override and imp:
                 kwargs2 = kwargs.copy()
                 olddir = Path(kwargs['cat_dir'])
                 kwargs2['cat_dir'] = os.path.join(olddir.parents[1], kwargs['impute_type'], kwargs['impute_number'])
