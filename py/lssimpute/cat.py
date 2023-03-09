@@ -44,7 +44,7 @@ def downsample_mask(base_mask, fraction, seed=None):
     Out:
         new mask array (np.array) with fewer masked (0) values but same length
     '''
-    masked_idx, _ = np.where(base_mask == 0)
+    masked_idx = np.where(base_mask == 0)[0]
     unmask_num = int(len(masked_idx) * fraction) #just get an int close to faction
     # setup rng shuffle to not require that source was preshuffled
     rng = np.random.default_rng(seed=seed)
