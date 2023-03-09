@@ -66,7 +66,7 @@ def downsample_randoms_by_ntile(randcat, fraction_by_ntile):
     Out:
         Downsampled random catalog
     '''
-    tot_mask = np.ones(len(randcat))
+    tot_mask = np.ones(len(randcat), dtype=bool)
     for ntile, frac in enumerate(fraction_by_ntile, start=1):
         # mask out values at ntiles
         new_mask = np.array(randcat['NTILE']!=ntile)
