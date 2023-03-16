@@ -9,6 +9,8 @@ parser.add_argument('--survey', '-s', default='y1mock', help='Survey to use (typ
 parser.add_argument('--version', '-v', default=0, help='catalog version, for mocks this is mock number')
 parser.add_argument('--impversion', '-i', default=None, help='override version for imputation, default None == same as version')
 parser.add_argument('--nobackground', '-nb', action='store_true', help='Skip imputing "background" (close to random) galaxies.')
+parser.add_argument('--overwrite', '-o', action='store_true', help='Set flag to allow overwriting of existing files')\
+
 # add dir management
 # catdir (for base catalogs for reading, no writing)
 # temp dir (intermediate files like logging, nn cats, etc)
@@ -46,7 +48,7 @@ impn_cat = impn.run(skip_background=uargs.nobackground)
 imps = impute.ImputeModel(obs_nncat, mis_nncat_s)
 imps_cat = imps.run(skip_background=uargs.nobackground)
 
-imps.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_S_impute_details.fits'))
-impn.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_N_impute_details.fits'))
-imps_cat.write(os.path.join(impute_dir, f'{uargs.tracer}_S_clustering.dat.fits'))
-impn_cat.write(os.path.join(impute_dir, f'{uargs.tracer}_N_clustering.dat.fits'))
+imps.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_S_impute_details.fits'), overwrite=uargs.overwrite)
+impn.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_N_impute_details.fits'), overwrite=uargs.overwrite)
+imps_cat.write(os.path.join(impute_dir, f'{uargs.tracer}_S_clustering.dat.fits'), overwrite=uargs.overwrite)
+impn_cat.write(os.path.join(impute_dir, f'{uargs.tracer}_N_clustering.dat.fits'), overwrite=uargs.overwrite)
