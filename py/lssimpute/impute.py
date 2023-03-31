@@ -382,6 +382,8 @@ class ImputeModel():
                         mistab['R'][mask & clus] = mistab[mask & clus]['r_n0'] + ckde.resample(np.count_nonzero(mask & clus))[0]
                     if skip_background:
                         mask = mask & (~back)
+                        if not has_clustered:
+                            break
                     else:
                         mistab['R'][mask & back] = mistab[mask & back]['r_n0'] + bkde.resample(np.count_nonzero(mask & back))[0]
 
