@@ -362,8 +362,15 @@ class ImputeModel():
                     csample_x = np.linspace(-backg,backg,100)
                     ckde_y = ckde.evaluate(csample_x)
                 else:
-                    clus_frac = len(clus_clus)/len(selclus)
+                    print('no "clustered" galaxies!')
+                bsample_x = np.linspace(-1, 1, 100)
+                bkde_y = bkde.evaluate(bsample_x)
 
+                # Draw z's ###CHECK THIS####
+                if clusfrac_override is not None:
+                    clus_frac = clusfrac_override
+                else:  
+                    clus_frac = len(clus_clus)/len(selclus)
                 #maxz = max(selectclus['Z'])
                 #for row in fittab:
                 mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
