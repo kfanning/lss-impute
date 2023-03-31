@@ -2,7 +2,6 @@ import sys
 from astropy.table import Table
 import numpy as np
 import matplotlib.pyplot as plt
-from desitarget.sv3.sv3_targetmask import desi_mask as sv3mask
 from LSS.tabulated_cosmo import TabulatedDESI
 from scipy.stats import gaussian_kde
 import scipy
@@ -20,8 +19,16 @@ class ImputeModel():
     def __init__(self, cluscat, misscat, region=None, version=None):
         self.cluscat = cluscat
         self.misscat = misscat
+        self.cosmo = TabulatedDESI()
+        self.misscat['r_n0'] = self.cosmo.comoving_radial_distance(self.misscat['z_n0'])
+        self.misscat['sp_n0'] = self.misscat['r_n0']*self.misscat['angdist_n0'] #small angle aprox + angdist in rad!
+        self.cluscat['r_n0'] = self.cosmo.comoving_radial_distance(self.cluscat['z_n0'])
+        self.cluscat['sp_n0'] = self.cluscat['r_n0']*self.cluscat['angdist_n0'] #small angle aprox + angdist in rad!
+        self.cluscat['R'] = self.cosmo.comoving_radial_distance(self.cluscat['R'])
         self.did_angbin = False
         self.did_zbin = False
+        self.did_sperpbin = False
+        self.did_rbin = False
         return
 
     def bin_angular(self):
@@ -50,6 +57,31 @@ class ImputeModel():
         self.did_angbin = True
         return
 
+    def bin_sperp(self):
+        #S_perp dist binning
+        maxbin = np.max(self.misscat['sperp_n0'])
+        nbins = 18
+        selectclus = self.cluscat[self.cluscat['sperp_n0'] < maxbin]
+        self.sperp_misbins, self.sperp_edges = np.histogram(self.misscat['sperp_n0'], range=(0,maxbin), bins=nbins)
+        self.sperp_clusbins, clusedges = np.histogram(selectclus['sperp_n0'], range=(0,maxbin), bins=nbins)
+        # merge bins 6,7 and 8-14
+        mergebin = 6
+        maskb = np.ones(len(self.sperp_misbins))
+        #maskb[7] = 0
+        maskb[mergebin:-1] = 0
+        maske = np.ones(len(self.sperp_edges))
+        #maske[7] = 0
+        maske[mergebin+1:-1] = 0
+        #misbins[6] += misbins[7]
+        #clusbins[6] += clusbins[7]
+        self.sperp_misbins[-1] += np.sum(self.sperp_misbins[mergebin:])
+        self.sperp_clusbins[-1] += np.sum(self.sperp_clusbins[mergebin:])
+        self.sperp_misbins = np.extract(maskb, self.sperp_misbins)
+        self.sperp_edges = np.extract(maske, self.sperp_edges)
+        self.sperp_clusbins = np.extract(maskb, self.sperp_clusbins)
+        self.did_sperpbin = True
+        return
+
     def plot_angbins(self, show=False):
         ntot = np.sum(self.ang_misbins) + np.sum(self.ang_clusbins)
         s_misbins = self.ang_misbins/ntot * 100
@@ -74,7 +106,6 @@ class ImputeModel():
         minbin = min([np.min(self.misscat['z_n0']), np.min(self.cluscat['z_n0'])]) #0.4# might want to use range of all data?
         nbins = 15#18 #20
         selectclus2 = self.cluscat[(self.cluscat['z_n0'] < maxbin) & (self.cluscat['z_n0'] > minbin)]
-        ntot = len(selectclus2['Z']) + len(self.misscat['Z'])
         self.z_misbins, self.z_edges = np.histogram(self.misscat['z_n0'], range=(minbin,maxbin), bins=nbins)
         self.z_clusbins, _ = np.histogram(selectclus2['z_n0'], range=(minbin,maxbin), bins=nbins)
         # merge first + last bins
@@ -100,6 +131,40 @@ class ImputeModel():
         self.z_clusbins = np.extract(mask, self.z_clusbins)
         self.z_edges = np.extract(mask2, self.z_edges)
         self.did_zbin = True
+        return
+
+    def bin_r(self):
+        #nn r binning
+        # loooking at nn r
+        maxbin = max([np.max(self.misscat['r_n0']), np.max(self.cluscat['r_n0'])]) #1.1
+        minbin = min([np.min(self.misscat['r_n0']), np.min(self.cluscat['r_n0'])]) #0.4# might want to use range of all data?
+        nbins = 15#18 #20
+        selectclus2 = self.cluscat[(self.cluscat['r_n0'] < maxbin) & (self.cluscat['r_n0'] > minbin)]
+        self.r_misbins, self.r_edges = np.histogram(self.misscat['r_n0'], range=(minbin,maxbin), bins=nbins)
+        self.r_clusbins, _ = np.histogram(selectclus2['r_n0'], range=(minbin,maxbin), bins=nbins)
+        # merge first + last bins
+        num_merge = 3#4
+        mask = np.ones(len(self.r_misbins))
+        mask[1:num_merge+1] = 0
+        mask[-1*num_merge-1:-1] = 0
+
+        mask2 = np.ones(len(self.r_edges))
+        mask2[1:num_merge+1] = 0
+        mask2[-1*num_merge-1:-1] = 0
+
+        self.r_misbins[0] = np.sum(self.r_misbins[0:num_merge+1])
+        #misbins2[0] = misbins2[0] + misbins2[1] + misbins2[2] + misbins2[3]
+        self.r_clusbins[0] = np.sum(self.r_clusbins[0:num_merge+1])
+        #clusbins2[0] = clusbins2[0] + clusbins2[1] + clusbins2[2] + clusbins2[3]
+        self.r_misbins[-1] = np.sum(self.r_misbins[-1*num_merge-1:-1])
+        #misbins2[-1] = misbins2[-1] + misbins2[-2] + misbins2[-3] + misbins2[-4]
+        self.r_clusbins[-1] = np.sum(self.r_clusbins[-1*num_merge-1:-1])
+        #clusbins2[-1] = clusbins2[-1] + clusbins2[-2] + clusbins2[-3] + clusbins2[-4]
+        #print(misbins2)
+        self.r_misbins = np.extract(mask, self.r_misbins)
+        self.r_clusbins = np.extract(mask, self.r_clusbins)
+        self.r_edges = np.extract(mask2, self.r_edges)
+        self.did_rbin = True
         return
 
     def plot_zbins(self, show=False):
@@ -239,8 +304,135 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
-    def run(self, clusfrac_override=None, skip_background=False):
-        self.bin_angular()
-        self.bin_z()
-        mistab = self.impute(clusfrac_override=clusfrac_override, skip_background=skip_background)
+    def impute_physical(self, clusfrac_override=None, skip_background=False):
+        #impute model
+        mistab = self.misscat.copy()
+        mistab['randnum'] = np.random.random_sample(len(mistab))
+        mistab['R'] = np.zeros(len(mistab), dtype=np.float64) - 1
+        mistab['Z'] = np.zeros(len(mistab), dtype=np.float64) - 1
+        # data storage
+        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK']
+        binnum = []
+        minrs = []
+        maxrs = []
+        minsperps = []
+        maxsperps = []
+        nominalfrac = []
+        n_obsclus = []
+        n_obsback = []
+        n_misclus = []
+        n_misback = []
+
+        for j in range(len(self.sperp_edges)-1): #misedges is nn_angdist
+            for i in range(len(self.r_edges)-1): #misedges2 is nn_z
+                maxr = self.r_edges[i+1]
+                minr = self.r_edges[i]
+                minsperp = self.sperp_edges[j]
+                maxsperp = self.sperp_edges[j+1]
+                # changed n1 to n0 since the nn extractor should shift for self matches now, be careful
+                selclus = self.cluscat[(self.cluscat['r_n0'] > minr) & (self.cluscat['r_n0'] < maxr) & (self.cluscat['sperp_n0'] > minsperp) & (self.cluscat['sperp_n0'] < maxsperp)]# & (selectclus['Z'] > 0.4) & (selectclus['Z'] < 1.1)] #n1 is just cause the file has self as "n0" rather than a different object
+                selclus['rdiff'] = (selclus['R']-selclus['r_n0'])
+
+                #Seperate cluster/background cutoff is just +/- 0.01 for now (by inspection :))
+                #backg = 0.01
+                # 0.01 zdiff at low Z is ~ 45Mpc/h, ~25Mpc/h at high z where it maybe doesn't work well
+                backg = 45 #Mpc/h
+                clusmask = (selclus['rdiff'] < backg) & (selclus['rdiff'] > -1*backg)
+                clus_clus = selclus[clusmask]
+                clus_back = selclus[~clusmask]
+
+                #ccbins1, cbedges1 = np.histogram(clus_back['zdiff'], bins=25, range=(min(clus_back['zdiff']), -backg))
+                #ccbins2, cbedges2 =  np.histogram(clus_back['zdiff'], bins=25, range=(backg, max(clus_back['zdiff'])))
+                #cbbins = np.concatenate((ccbins1, ccbins2))
+                #cbedges = np.concatenate((cbedges1, cbedges2))
+                cbbins, cbedges = np.histogram(clus_back['rdiff'], bins=50)#, range=(-0.01,0.01))
+                #cbbins1, cbedges1 = np.histogram(clus_back[clusback['zdiff'] < -1*backg]['zdiff'], bins=50)#, range=(-0.01,0.01))
+                #cbbins2, cbedges2 = np.histogram(clus_back[clusback['zdiff'] > backg]['zdiff'], bins=50)#, range=(-0.01,0.01))
+                ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=50)#, range=(-0.01,0.01))
+
+                y1 = cbbins/(len(clus_back)*(cbedges[1]-cbedges[0]))
+                x1 = ((cbedges[1:] + cbedges[:-1])/2)#np.concatenate()(cbedges2[1:] + cbedges2[:-1])/2))
+                y2 = ccbins/(len(clus_clus)*(ccedges[1]-ccedges[0]))
+                x2 = (ccedges[1:] + ccedges[:-1])/2
+
+                bkde = gaussian_kde(clus_back['rdiff'])
+                has_clustered = (len(clus_clus) > 1)
+                if has_clustered:
+                    ckde = gaussian_kde(clus_clus['rdiff'])#, h=0.01)
+                    csample_x = np.linspace(-backg,backg,100)
+                    ckde_y = ckde.evaluate(csample_x)
+                else:
+                    clus_frac = len(clus_clus)/len(selclus)
+
+                #maxz = max(selectclus['Z'])
+                #for row in fittab:
+                mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
+                while np.count_nonzero(mask) > 0:
+                    mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
+                    back = (mistab['randnum'] > clus_frac)
+                    if has_clustered:
+                        clus = (mistab['randnum'] < clus_frac)
+                        mistab['R'][mask & clus] = mistab[mask & clus]['r_n0'] + ckde.resample(np.count_nonzero(mask & clus))[0]
+                    if skip_background:
+                        mask = mask & (~back)
+                    else:
+                        mistab['R'][mask & back] = mistab[mask & back]['r_n0'] + bkde.resample(np.count_nonzero(mask & back))[0]
+
+                select_miss = mistab[(mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp)]
+                rdiff_new = select_miss['R'] - select_miss['r_n0']
+                miss_clus_mask = (rdiff_new < backg) & (rdiff_new > -1*backg)
+                mistab['Z'] = self._inverse_comoving_radial_dist(mistab['R'])
+                # data collection
+                binnum.append(i+(j*(len(self.r_edges)-1))) 
+                minrs.append(minr)
+                maxrs.append(maxr)
+                minsperps.append(minsperp)
+                maxsperps.append(maxsperp)
+                nominalfrac.append(clus_frac)
+                n_obsclus.append(len(clus_clus))
+                n_obsback.append(len(clus_back))
+                n_misclus.append(len(select_miss[miss_clus_mask]))
+                n_misback.append(len(select_miss[~miss_clus_mask]))
+
+                if False: #((i % 5) == 0) | (i > 0): 
+                    fig, axs = plt.subplots(1,2)#, sharey=True)
+                    fig.dpi=200
+                    fig.suptitle(f'{minr:.3f} < R < {maxr:.3f}, {minsperp} < S_perp < {maxsperp:.3f}')
+
+                    axs[0].set_ylabel('probability density of galaxies')
+                    axs[0].set_title('"Background" Pairs')
+                    axs[0].hist(cbedges[:-1], cbedges, weights=y1, color='b')
+                    #axs[0].hist(cbedges2[:-1], cbedges2, weights=np.split(y1, 2)[1], color='b')
+                    #axs[0].plot(x1, yfit1, 'k--')
+                    axs[0].plot(bsample_x, bkde_y, 'r-')
+                    axs[0].set_xlabel('Z diff')
+
+                    axs[1].set_title('"Clustered" Pairs')
+                    axs[1].hist(ccedges[:-1], ccedges, weights=y2, color='g')
+                    #axs[1].plot(x2, yfit2, 'k--')
+                    if has_clustered:
+                        axs[1].plot(csample_x, ckde_y, 'r-')
+                    axs[1].set_xlabel('Z diff')
+        
+        self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, n_obsclus, n_obsback, n_misclus, n_misback], names=names)
+        #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
+        #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
+        return mistab
+
+    def _inverse_comoving_radial_dist(self, r):
+        '''
+        Inverse of cosmo.comoving_radial_distance since tabulatedDESI does not have it
+        '''
+        return np.interp(r, self.cosmo._comoving_radial_distance, self.cosmo._z, left=None, right=None)
+
+    def run(self, clusfrac_override=None, skip_background=False, physical=True):
+        if physical:
+            # order here currently doesn't matter but it might be a good change to do a binning of sperp for each rbin
+            self.bin_r()
+            self.bin_sperp()
+            mistab = self.impute_physical(clusfrac_override=clusfrac_override, skip_background=skip_background)
+        else:
+            self.bin_angular()
+            self.bin_z()
+            mistab = self.impute(clusfrac_override=clusfrac_override, skip_background=skip_background)
         return mistab

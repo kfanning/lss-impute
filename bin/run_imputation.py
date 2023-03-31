@@ -9,7 +9,8 @@ parser.add_argument('--survey', '-s', default='y1mock', help='Survey to use (typ
 parser.add_argument('--version', '-v', default=0, help='catalog version, for mocks this is mock number')
 parser.add_argument('--impversion', '-i', default=None, help='override version for imputation, default None == same as version')
 parser.add_argument('--nobackground', '-nb', action='store_true', help='Skip imputing "background" (close to random) galaxies.')
-parser.add_argument('--overwrite', '-o', action='store_true', help='Set flag to allow overwriting of existing files')\
+parser.add_argument('--overwrite', '-o', action='store_true', help='Set flag to allow overwriting of existing files')
+parser.add_argument('--physical', '-p', action='store_true', help='Set flag to use physical units (S_perp, R) instead of Z and angular distance.')
 
 # add dir management
 # catdir (for base catalogs for reading, no writing)
@@ -44,9 +45,9 @@ obs_nncat = cat.extract_nn(obs)
 
 #run imputation
 impn = impute.ImputeModel(obs_nncat, mis_nncat_n)
-impn_cat = impn.run(skip_background=uargs.nobackground)
+impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical)
 imps = impute.ImputeModel(obs_nncat, mis_nncat_s)
-imps_cat = imps.run(skip_background=uargs.nobackground)
+imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical)
 
 imps.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_S_impute_details.fits'), overwrite=uargs.overwrite)
 impn.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_N_impute_details.fits'), overwrite=uargs.overwrite)
