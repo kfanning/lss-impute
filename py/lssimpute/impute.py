@@ -335,8 +335,8 @@ class ImputeModel():
 
                 #Seperate cluster/background cutoff is just +/- 0.01 for now (by inspection :))
                 #backg = 0.01
-                # 0.01 zdiff at low Z is ~ 45Mpc/h, ~25Mpc/h at high z where it maybe doesn't work well
-                backg = 45 #Mpc/h
+                # 0.01 zdiff at low Z is ~ 22.5Mpc/h, ~12.5Mpc/h at high z where it maybe doesn't work well
+                backg = 22.5 #Mpc/h
                 clusmask = (selclus['rdiff'] < backg) & (selclus['rdiff'] > -1*backg)
                 clus_clus = selclus[clusmask]
                 clus_back = selclus[~clusmask]
