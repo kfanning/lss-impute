@@ -21,9 +21,9 @@ class ImputeModel():
         self.misscat = misscat
         self.cosmo = TabulatedDESI()
         self.misscat['r_n0'] = self.cosmo.comoving_radial_distance(self.misscat['z_n0'])
-        self.misscat['sp_n0'] = self.misscat['r_n0']*self.misscat['angdist_n0'] #small angle aprox + angdist in rad!
+        self.misscat['sperp_n0'] = self.misscat['r_n0']*self.misscat['angdist_n0'] #small angle aprox + angdist in rad!
         self.cluscat['r_n0'] = self.cosmo.comoving_radial_distance(self.cluscat['z_n0'])
-        self.cluscat['sp_n0'] = self.cluscat['r_n0']*self.cluscat['angdist_n0'] #small angle aprox + angdist in rad!
+        self.cluscat['sperp_n0'] = self.cluscat['r_n0']*self.cluscat['angdist_n0'] #small angle aprox + angdist in rad!
         self.cluscat['R'] = self.cosmo.comoving_radial_distance(self.cluscat['Z'])
         self.did_angbin = False
         self.did_zbin = False
