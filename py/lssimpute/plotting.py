@@ -32,7 +32,11 @@ class validation_plots():
         nbins = 50
         zlo, zhi = self._find_zlims()
         for name in self.names:
-            edges, bincounts = np.histogram(self.cats[name]['Z'], range=(zlo,zhi), bins=nbins, density=True)
+            if name == 'full':
+                col = 'z_not4clus'
+            else:
+                col = 'Z'
+            edges, bincounts = np.histogram(self.cats[name][col], range=(zlo,zhi), bins=nbins, density=True)
             plt.stairs(edges, bincounts, color=self.colors[name], label=name)
         ax.legend()
         ax.set_ylabel('normalized n(z)')
@@ -130,6 +134,10 @@ class validation_plots():
         maxes = []
         mins = []
         for name in self.names:
-            maxes.append(np.max(self.cats[name]['Z']))
-            mins.append(np.max(self.cats[name]['Z']))
+            if name == 'full':
+                col = 'z_not4clus'
+            else:
+                col = 'Z'
+            maxes.append(np.max(self.cats[name][col]))
+            mins.append(np.max(self.cats[name][col]))
         return np.min(mins), np.max(maxes)
