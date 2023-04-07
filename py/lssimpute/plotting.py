@@ -90,7 +90,7 @@ class validation_plots():
             rcatcol = 'z_n0'
             backg = 0.01
         cat = self.cats[catver]
-        rdiffs = cat[rname] - cat[f'{rname.lower}_n0']
+        rdiffs = cat[rname] - cat[f'{rname.lower()}_n0']
         rmins = list(self.imputedetails[f'MIN_{rname}'])
         rmaxs = list(self.imputedetails[f'MAX_{rname}'])
         pmins = list(self.imputedetails[f'MIN_{perpcol}'])
@@ -100,7 +100,7 @@ class validation_plots():
         for i in range(len(rmins)):
             for j in range(len(pmins)):
                 mask = (cat[rcatcol] < rmaxs[i]) & (cat[rcatcol] > rmins[i]) & (cat[pcatcol] > pmins[j]) & (cat[pcatcol] < pmaxs[j])
-                rdiffs = cat[mask][rname] - cat[mask][f'{rname.lower}_n0']
+                rdiffs = cat[mask][rname] - cat[mask][f'{rname.lower()}_n0']
                 fig, axs = plt.subplots(1,2)#, sharey=True)
                 fig.dpi=self.dpi
                 fig.suptitle(f'bin: {j+(i*(len(pmins)))} / {rmins[i]:.3f}{runit} < {rname} < {rmaxs[i]:.3f}{runit}, {pmins[j]:.3f}{perpunit} < {perpname} < {pmaxs[j]:.3f}{perpunit}')
