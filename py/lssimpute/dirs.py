@@ -24,3 +24,18 @@ def get_stagedir(survey, version):
     '''
     version=str(version) #often passed as an int
     return os.path.join(basedir, 'impute', 'staging', survey, version)
+
+
+def pk_fn(tracer, zlo, zhi, weightt=None, bint='lin', n='1', region='', impute=''):
+    if region != '':
+        region += '_'
+    if impute != '':
+        impute += '_'
+    return 'pkpoles' + '_' + tracer + '_' + region + impute + str(zlo) + '_' + str(zhi) + '_' + str(weightt) + '_' + bint + str(n) + '.txt'
+
+def pk_npy(tracer, zlo, zhi, weightt=None, bint='lin', region='', impute=''):
+    if region != '':
+        region += '_'
+    if impute != '':
+        impute += '_'
+    return 'pkpoles' + '_' + tracer + '_' +region + impute + str(zlo) + '_' + str(zhi) + '_' + str(weightt) + '_' + bint + '.npy'

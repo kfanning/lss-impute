@@ -29,6 +29,8 @@ class ImputeModel():
         self.did_zbin = False
         self.did_sperpbin = False
         self.did_rbin = False
+        self.backg_R = 22.5 #Mpc/h
+        self.backg_Z = 0.01
         return
 
     def bin_angular(self):
@@ -214,7 +216,7 @@ class ImputeModel():
                 #Sselmis['zdiff'] = (selmis['Z']-selmis['z_n0'])
 
                 #Seperate cluster/background cutoff is just +/- 0.01 for now (by inspection :))
-                backg = 0.01
+                backg = self.backg_Z# 0.01
                 clusmask = (selclus['zdiff'] < backg) & (selclus['zdiff'] > -1*backg)
                 clus_clus = selclus[clusmask]
                 clus_back = selclus[~clusmask]
@@ -336,7 +338,7 @@ class ImputeModel():
                 #Seperate cluster/background cutoff is just +/- 0.01 for now (by inspection :))
                 #backg = 0.01
                 # 0.01 zdiff at low Z is ~ 22.5Mpc/h, ~12.5Mpc/h at high z where it maybe doesn't work well
-                backg = 22.5 #Mpc/h
+                backg = self.backg_R#22.5 #Mpc/h
                 clusmask = (selclus['rdiff'] < backg) & (selclus['rdiff'] > -1*backg)
                 clus_clus = selclus[clusmask]
                 clus_back = selclus[~clusmask]
