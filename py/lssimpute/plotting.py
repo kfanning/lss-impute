@@ -36,7 +36,7 @@ class validation_plots():
                 col = 'Z_not4clus'
             else:
                 col = 'Z'
-            edges, bincounts = np.histogram(self.cats[name][col], range=(zlo,zhi), bins=nbins, density=True)
+            bincounts, edges = np.histogram(self.cats[name][col], range=(zlo,zhi), bins=nbins, density=True)
             ax.hist(self.cats[name][col], bins=edges, color=self.colors[name], label=name, histtype='step')
         ax.legend()
         ax.set_ylabel('normalized n(z)')
