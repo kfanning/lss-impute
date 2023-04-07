@@ -138,6 +138,6 @@ class validation_plots():
                 col = 'Z_not4clus'
             else:
                 col = 'Z'
-            maxes.append(np.max(self.cats[name][col]))
-            mins.append(np.max(self.cats[name][col]))
+            maxes.append(np.nanmax(self.cats[name][col]))
+            mins.append(np.nanmin(self.cats[name][col]))
         return np.min(mins), np.max(maxes)
