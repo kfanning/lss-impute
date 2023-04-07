@@ -37,7 +37,7 @@ class validation_plots():
             else:
                 col = 'Z'
             edges, bincounts = np.histogram(self.cats[name][col], range=(zlo,zhi), bins=nbins, density=True)
-            ax.stairs(edges, bincounts, color=self.colors[name], label=name)
+            ax.hist(self.cats[name][col], bins=edges, color=self.colors[name], label=name, histtype='step')
         ax.legend()
         ax.set_ylabel('normalized n(z)')
         ax.set_xlabel('z')
