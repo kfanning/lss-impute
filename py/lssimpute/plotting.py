@@ -33,7 +33,7 @@ class validation_plots():
         zlo, zhi = self._find_zlims()
         for name in self.names:
             if name == 'full':
-                col = 'z_not4clus'
+                col = 'Z_not4clus'
             else:
                 col = 'Z'
             edges, bincounts = np.histogram(self.cats[name][col], range=(zlo,zhi), bins=nbins, density=True)
@@ -135,7 +135,7 @@ class validation_plots():
         mins = []
         for name in self.names:
             if name == 'full':
-                col = 'z_not4clus'
+                col = 'Z_not4clus'
             else:
                 col = 'Z'
             maxes.append(np.max(self.cats[name][col]))
