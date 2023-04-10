@@ -95,7 +95,7 @@ class validation_plots():
         rmaxs = sorted(list(set(self.imputedetails[f'MAX_{rname}'])))
         pmins = sorted(list(set(self.imputedetails[f'MIN_{perpcol}'])))
         pmaxs = sorted(list(set(self.imputedetails[f'MAX_{perpcol}'])))
-        binnum = list(self.imputedetails[f'BINNUM'])
+        binnum = list(self.imputedetails[f'BIN_NUM'])
         figs = []
         for j in range(len(pmins)):
             for i in range(len(rmins)):
@@ -103,7 +103,7 @@ class validation_plots():
                 rdiffs = cat[mask][rname] - cat[mask][f'{rname.lower()}_n0']
                 fig, axs = plt.subplots(1,2)#, sharey=True)
                 fig.dpi=self.dpi
-                fig.suptitle(f'bin: {j+(i*(len(pmins)))} / {rmins[i]:.3f}{runit} < {rname} < {rmaxs[i]:.3f}{runit}, {pmins[j]:.3f}{perpunit} < {perpname} < {pmaxs[j]:.3f}{perpunit}')
+                fig.suptitle(f'bin: {binnum[j+(i*(len(pmins)))]} / {rmins[i]:.3f}{runit} < {rname} < {rmaxs[i]:.3f}{runit}, {pmins[j]:.3f}{perpunit} < {perpname} < {pmaxs[j]:.3f}{perpunit}')
                 axs[0].set_ylabel('fraction of galaxies in bin')
                 axs[0].set_title('"Background" Pairs')
                 
