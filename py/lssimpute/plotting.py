@@ -39,7 +39,7 @@ class validation_plots():
             if name == 'impute':
                 mask = np.array(self.cats[name]['Z']) > 0.0
             else:
-                mask = np.ones(len(self.cats[name]))
+                mask = np.ones(len(self.cats[name]), dtype=int)
             bincounts, edges = np.histogram(self.cats[name][mask][col], range=(zlo,zhi), bins=nbins, density=True)
             ax.hist(self.cats[name][mask][col], bins=edges, color=self.colors[name], label=name, histtype='step', density=True)
         ax.legend()
