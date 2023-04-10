@@ -37,7 +37,7 @@ class validation_plots():
             else:
                 col = 'Z'
             if name == 'impute':
-                mask = self.cats[name]['Z'] > 0.0
+                mask = np.array(self.cats[name]['Z']) > 0.0
             else:
                 mask = np.ones(len(self.cats[name]))
             bincounts, edges = np.histogram(self.cats[name][mask][col], range=(zlo,zhi), bins=nbins, density=True)
