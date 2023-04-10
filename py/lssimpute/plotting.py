@@ -37,7 +37,7 @@ class validation_plots():
             else:
                 col = 'Z'
             bincounts, edges = np.histogram(self.cats[name][col], range=(zlo,zhi), bins=nbins, density=True)
-            ax.hist(self.cats[name][col], bins=edges, color=self.colors[name], label=name, histtype='step')
+            ax.hist(self.cats[name][col], bins=edges, color=self.colors[name], label=name, histtype='step', density=True)
         ax.legend()
         ax.set_ylabel('normalized n(z)')
         ax.set_xlabel('z')
@@ -91,14 +91,14 @@ class validation_plots():
             backg = 0.01
         cat = self.cats[catver]
         rdiffs = cat[rname] - cat[f'{rname.lower()}_n0']
-        rmins = list(self.imputedetails[f'MIN_{rname}'])
-        rmaxs = list(self.imputedetails[f'MAX_{rname}'])
-        pmins = list(self.imputedetails[f'MIN_{perpcol}'])
-        pmaxs = list(self.imputedetails[f'MAX_{perpcol}'])
-        binnum = list(self.imputedetails[f'MAX_{perpcol}'])
+        rmins = sorted(list(set(self.imputedetails[f'MIN_{rname}'])))
+        rmaxs = sorted(list(set(self.imputedetails[f'MAX_{rname}'])))
+        pmins = sorted(list(set(self.imputedetails[f'MIN_{perpcol}'])))
+        pmaxs = sorted(list(set(self.imputedetails[f'MAX_{perpcol}'])))
+        binnum = list(self.imputedetails[f'BINNUM'])
         figs = []
-        for i in range(len(rmins)):
-            for j in range(len(pmins)):
+        for j in range(len(pmins)):
+            for i in range(len(rmins)):
                 mask = (cat[rcatcol] < rmaxs[i]) & (cat[rcatcol] > rmins[i]) & (cat[pcatcol] > pmins[j]) & (cat[pcatcol] < pmaxs[j])
                 rdiffs = cat[mask][rname] - cat[mask][f'{rname.lower()}_n0']
                 fig, axs = plt.subplots(1,2)#, sharey=True)
@@ -110,8 +110,8 @@ class validation_plots():
                 clusmask = (rdiffs < backg) & (rdiffs > -1*backg)
                 clus = rdiffs[clusmask]
                 back = rdiffs[~clusmask]
-                cbbins, cbedges = np.histogram(rdiffs, bins=50)
-                ccbins, ccedges = np.histogram(rdiffs, bins=50)
+                cbbins, cbedges = np.histogram(back, bins=50)
+                ccbins, ccedges = np.histogram(clus, bins=50)
                 y1 = cbbins/len(rdiffs)
                 y2 = ccbins/len(rdiffs)
 
