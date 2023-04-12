@@ -62,7 +62,7 @@ class validation_plots():
             ax.set_xlabel('True vs Impute Z Diff')
             ax.set_ylabel('density')
             catcut = cat[np.isin(cat['TARGETID'], self.cats['impute_only']['TARGETID'])]
-            cutcat = cutcat[cutcat['Z_imp'] > 0.0]
+            catcut = catcut[catcut['Z_imp'] > 0.0]
             zdiff = catcut['Z_comp'] - catcut['Z_imp']
             ax.hist(zdiff, color=self.colors['impute_only'], histtype='step', density=True)
             return fig
