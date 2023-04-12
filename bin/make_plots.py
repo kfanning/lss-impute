@@ -24,6 +24,8 @@ impute_dir = dirs.get_catdir('y1model', impver)
 #read catalogs (using complete and full catalogs then splitting later)
 clusn = Table.read(os.path.join(stagedir, f'{uargs.tracer}_N_clustering.dat.fits'))
 cluss = Table.read(os.path.join(stagedir, f'{uargs.tracer}_S_clustering.dat.fits'))
+missn = Table.read(os.path.join(stagedir, f'{uargs.tracer}_N_missing.dat.fits'))
+misss = Table.read(os.path.join(stagedir, f'{uargs.tracer}_S_missing.dat.fits'))
 full =  Table.read(os.path.join(catdir, f'{uargs.tracer}_full.dat.fits'))
 impn = Table.read(os.path.join(impute_dir, f'{uargs.tracer}_N_clustering.dat.fits'))
 imps = Table.read(os.path.join(impute_dir, f'{uargs.tracer}_S_clustering.dat.fits'))
@@ -32,7 +34,7 @@ detailss = Table.read(os.path.join(stagedir, f'{uargs.tracer}_S_impute_details.f
 
 surv = f'{uargs.survey}/{uargs.version}'
 
-plotter = plotting.validation_plots(imputecat=impn, cluscat=clusn, fullcat=full, imputedetails=detailsn, survey=surv, tracer=uargs.tracer, region='N')
+plotter = plotting.validation_plots(imputecat=impn, cluscat=clusn, fullcat=full, miscat=missn, imputedetails=detailsn, survey=surv, tracer=uargs.tracer, region='N')
 fig = plotter.imp_vs_true()
 fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_impvtrue.pdf')
 fig.close()
@@ -50,7 +52,7 @@ with PdfPages(filename) as pdf:
         pdf.savefig(fig)
         plt.close(fig)
 
-plotter = plotting.validation_plots(imputecat=imps, cluscat=cluss, fullcat=full, imputedetails=detailss, survey=surv, tracer=uargs.tracer, region='S')
+plotter = plotting.validation_plots(imputecat=imps, cluscat=cluss, fullcat=full, miscat=misss, imputedetails=detailss, survey=surv, tracer=uargs.tracer, region='S')
 fig = plotter.imp_vs_true()
 fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_impvtrue.pdf')
 fig.close()

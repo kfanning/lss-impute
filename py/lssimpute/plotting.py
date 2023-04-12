@@ -11,13 +11,13 @@ def uselato(self, fdir):
 
 class validation_plots():
 
-    def __init__(self, imputecat=None, fullcat=None, cluscat=None, imputedetails=None, survey=None, tracer=None, region=None):
+    def __init__(self, imputecat=None, fullcat=None, cluscat=None, miscat=None, imputedetails=None, survey=None, tracer=None, region=None):
         # stuff - merge NS catlogs beforehand
         # cluscat shoulw be the "staging" IE with  nn info clus cat"
         self.dpi = 200
-        self.colors = {'complete': 'k', 'observed': 'c', 'impute_only': 'r', 'impute': 'm'}    
-        self.names = ['complete', 'observed', 'impute_only', 'impute']
-        self.cats = {'complete': fullcat, 'observed': cluscat, 'impute_only': imputecat, 'impute': None}
+        self.colors = {'complete': 'k', 'observed': 'c', 'impute_only': 'r', 'impute': 'm', 'missing': 'b'}    
+        self.names = ['complete', 'observed', 'impute_only', 'impute', 'missing']
+        self.cats = {'complete': fullcat, 'observed': cluscat, 'impute_only': imputecat, 'impute': None, 'missing': miscat}
         if cluscat is not None and imputecat is not None:
             self.cats['impute'] = vstack([cluscat, imputecat])
         # Just get rid of empty cats here
@@ -53,15 +53,16 @@ class validation_plots():
         return fig
 
     def imp_vs_true(self):
-        if 'complete' in self.names and 'impute_only' in self.names:
+        if 'missing' in self.names and 'impute_only' in self.names:
             #get full catalog in impute catalog
-            cat = join(self.cats['complete'], self.cats['impute_only'], keys='TARGETID', table_names=['comp','imp'])
+            cat = join(self.cats['missing'], self.cats['impute_only'], keys='TARGETID', table_names=['comp','imp'])
             fig, ax = plt.subplots()
             fig.dpi = self.dpi
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
             ax.set_xlabel('True vs Impute Z Diff')
             ax.set_ylabel('density')
             catcut = cat[np.isin(cat['TARGETID'], self.cats['impute_only']['TARGETID'])]
+            cutcat = cutcat[cutcat['Z_imp'] > 0.0]
             zdiff = catcut['Z_comp'] - catcut['Z_imp']
             ax.hist(zdiff, color=self.colors['impute_only'], histtype='step', density=True)
             return fig
