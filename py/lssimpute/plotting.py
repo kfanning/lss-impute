@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy.table import Table
+from astropy.table import Table, vstack, join
 
 def uselato(self, fdir):
     import matplotlib as mpl
@@ -15,9 +15,11 @@ class validation_plots():
         # stuff - merge NS catlogs beforehand
         # cluscat shoulw be the "staging" IE with  nn info clus cat"
         self.dpi = 200
-        self.colors = {'full': 'k', 'clustering': 'c', 'impute': 'r'}    
-        self.names = ['full', 'clustering', 'impute']
-        self.cats = {'full': fullcat, 'clustering': cluscat, 'impute': imputecat}
+        self.colors = {'complete': 'k', 'observed': 'c', 'impute_only': 'r', 'impute': 'm'}    
+        self.names = ['complete', 'observed', 'impute_only', 'impute']
+        self.cats = {'complete': fullcat, 'observed': cluscat, 'impute_only': imputecat, 'impute': None}
+        if cluscat is not None and imputecat is not None:
+            self.cats['impute'] = vstack([cluscat, imputecat])
         # Just get rid of empty cats here
         self.names = [name for name in self.names if self.cats[name] is not None]
         self.survey = survey
@@ -32,11 +34,11 @@ class validation_plots():
         nbins = 50
         zlo, zhi = self._find_zlims()
         for name in self.names:
-            if name == 'full':
+            if name == 'complete':
                 col = 'Z_not4clus'
             else:
                 col = 'Z'
-            if name == 'impute':
+            if 'impute' in name:
                 mask = np.array(self.cats[name]['Z']) > 0.0
             else:
                 mask = np.ones(len(self.cats[name]), dtype=bool)
@@ -51,11 +53,18 @@ class validation_plots():
         return fig
 
     def imp_vs_true(self):
-        if 'full' in self.names and 'impute' in self.names:
+        if 'complete' in self.names and 'impute_only' in self.names:
             #get full catalog in impute catalog
+            cat = join(self.cats['complete'], self.cats['impute_only'], keys='TARGETID', how='outer', table_names=['comp','imp'])
             fig, ax = plt.subplots()
             fig.dpi = self.dpi
-            ax.set_title(f'{self.survey} {self.tracer}')
+            ax.set_title(f'{self.survey} {self.tracer} {self.region}')
+            ax.set_xlabel('True vs Impute Z Diff')
+            ax.set_ylabel('density')
+            catcut = cat[np.isin(cat['TARGETID'], self.cats['impute_only']['TARGETID'])]
+            zdiff = catcut['Z_comp'] - catcut['Z_imp']
+            ax.hist(zdiff, color=self.colors['impute_only'], histtype='step', density=True)
+            return fig
         else:
             return
 
@@ -74,7 +83,7 @@ class validation_plots():
     def imputation_bins(self):
         return
 
-    def imputation_fits(self, catver='clustering', mode='physical'):
+    def imputation_fits(self, catver='observed', mode='physical'):
         if mode == 'physical':
             rname = 'R'
             runit = 'Mpc/h'
@@ -138,7 +147,7 @@ class validation_plots():
         maxes = []
         mins = []
         for name in self.names:
-            if name == 'full':
+            if name == 'complete':
                 col = 'Z_not4clus'
             else:
                 col = 'Z'
