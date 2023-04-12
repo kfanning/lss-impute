@@ -55,7 +55,7 @@ class validation_plots():
     def imp_vs_true(self):
         if 'complete' in self.names and 'impute_only' in self.names:
             #get full catalog in impute catalog
-            cat = join(self.cats['complete'], self.cats['impute_only'], keys='TARGETID', how='outer', table_names=['comp','imp'])
+            cat = join(self.cats['complete'], self.cats['impute_only'], keys='TARGETID', table_names=['comp','imp'])
             fig, ax = plt.subplots()
             fig.dpi = self.dpi
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
