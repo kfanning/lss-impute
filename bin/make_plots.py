@@ -33,6 +33,9 @@ detailss = Table.read(os.path.join(stagedir, f'{uargs.tracer}_S_impute_details.f
 surv = f'{uargs.survey}/{uargs.version}'
 
 plotter = plotting.validation_plots(imputecat=impn, cluscat=clusn, fullcat=full, imputedetails=detailsn, survey=surv, tracer=uargs.tracer, region='N')
+fig = plotter.imp_vs_true()
+fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_impvtrue.pdf')
+fig.close()
 fig = plotter.n_z()
 fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_nz.pdf')
 plt.close(fig)
@@ -48,6 +51,9 @@ with PdfPages(filename) as pdf:
         plt.close(fig)
 
 plotter = plotting.validation_plots(imputecat=imps, cluscat=cluss, fullcat=full, imputedetails=detailss, survey=surv, tracer=uargs.tracer, region='S')
+fig = plotter.imp_vs_true()
+fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_impvtrue.pdf')
+fig.close()
 fig = plotter.n_z()
 fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_nz.pdf')
 plt.close(fig)
