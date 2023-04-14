@@ -37,8 +37,8 @@ obsn, missn = cat.split_obs_missed(full, clusn, region='N')
 obss, misss = cat.split_obs_missed(full, cluss, region='S')
 
 #get nn cats, currently only extracting nn, not some set of them
-mis_nncat_n = cat.extract_nn(missn, obs)
-mis_nncat_s = cat.extract_nn(misss, obs)
+mis_nncat_n = cat.extract_nn(missn, obsn)
+mis_nncat_s = cat.extract_nn(misss, obss)
 obs_nncat_n = cat.extract_nn(obsn)
 obs_nncat_s = cat.extract_nn(obss)
 
