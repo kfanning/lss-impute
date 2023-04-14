@@ -64,7 +64,7 @@ class validation_plots():
             catcut = cat[np.isin(cat['TARGETID'], self.cats['impute_only']['TARGETID'])]
             catcut = catcut[catcut['Z_imp'] > 0.0]
             zdiff = catcut['Z_comp'] - catcut['Z_imp']
-            ax.hist(zdiff, color=self.colors['impute_only'], histtype='step', density=True)
+            ax.hist(zdiff, color=self.colors['impute_only'], histtype='step', density=True, bins=50)
             return fig
         else:
             return
