@@ -14,11 +14,11 @@ parser.add_argument('--physical', '-p', action='store_true', help='Set flag to u
 
 uargs = parser.parse_args()
 catdir = dirs.get_catdir(uargs.survey, uargs.version)
-stagedir = dirs.get_stagedir(uargs.survey, uargs.version)
 if uargs.impversion is not None:
     impver = uargs.impversion
 else:
     impver = uargs.version
+stagedir = dirs.get_stagedir(uargs.survey, impver)
 impute_dir = dirs.get_catdir('y1model', impver)
 
 #read catalogs (using complete and full catalogs then splitting later)
