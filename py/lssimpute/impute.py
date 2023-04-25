@@ -430,6 +430,140 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
+    def impute_physical_fit(self, clusfrac_override=None, skip_background=True):
+        #impute model
+        mistab = self.misscat.copy()
+        mistab['randnum'] = np.random.random_sample(len(mistab))
+        mistab['R'] = np.zeros(len(mistab), dtype=np.float64) - 1
+        mistab['Z'] = np.zeros(len(mistab), dtype=np.float64) - 1
+        # data storage
+        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK', 'FIT_AMPLITUDE', 'FIT_SIGMA', 'FIT_SLOPE', 'FIT_INTERCEPT']
+        binnum = []
+        minrs = []
+        maxrs = []
+        minsperps = []
+        maxsperps = []
+        nominalfrac = []
+        n_obsclus = []
+        n_obsback = []
+        n_misclus = []
+        n_misback = []
+        amp = []
+        sig = []
+        slope = []
+        intercept = []
+
+        for j in range(len(self.sperp_edges)-1): #misedges is nn_angdist
+            for i in range(len(self.r_edges)-1): #misedges2 is nn_z
+                maxr = self.r_edges[i+1]
+                minr = self.r_edges[i]
+                minsperp = self.sperp_edges[j]
+                maxsperp = self.sperp_edges[j+1]
+                # changed n1 to n0 since the nn extractor should shift for self matches now, be careful
+                selclus = self.cluscat[(self.cluscat['r_n0'] > minr) & (self.cluscat['r_n0'] < maxr) & (self.cluscat['sperp_n0'] > minsperp) & (self.cluscat['sperp_n0'] < maxsperp)]# & (selectclus['Z'] > 0.4) & (selectclus['Z'] < 1.1)] #n1 is just cause the file has self as "n0" rather than a different object
+                selclus['rdiff'] = (selclus['R']-selclus['r_n0'])
+
+                #Seperate cluster/background cutoff is just +/- 0.01 for now (by inspection :))
+                #backg = 0.01
+                # 0.01 zdiff at low Z is ~ 22.5Mpc/h, ~12.5Mpc/h at high z where it maybe doesn't work well
+                backg = self.backg_R#22.5 #Mpc/h
+                clusmask = (selclus['rdiff'] < backg) & (selclus['rdiff'] > -1*backg)
+                clus_clus = selclus[clusmask]
+                clus_back = selclus[~clusmask]
+
+                #ccbins1, cbedges1 = np.histogram(clus_back['zdiff'], bins=25, range=(min(clus_back['zdiff']), -backg))
+                #ccbins2, cbedges2 =  np.histogram(clus_back['zdiff'], bins=25, range=(backg, max(clus_back['zdiff'])))
+                #cbbins = np.concatenate((ccbins1, ccbins2))
+                #cbedges = np.concatenate((cbedges1, cbedges2))
+                cbbins, cbedges = np.histogram(clus_back['rdiff'], bins=50)#, range=(-0.01,0.01))
+                #cbbins1, cbedges1 = np.histogram(clus_back[clusback['zdiff'] < -1*backg]['zdiff'], bins=50)#, range=(-0.01,0.01))
+                #cbbins2, cbedges2 = np.histogram(clus_back[clusback['zdiff'] > backg]['zdiff'], bins=50)#, range=(-0.01,0.01))
+                ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=50)#, range=(-0.01,0.01))
+
+                res = self._fit(clus_clus['rdiff'], ccbins, ccedges)
+                print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
+
+                y1 = cbbins/(len(clus_back)*(cbedges[1]-cbedges[0]))
+                x1 = ((cbedges[1:] + cbedges[:-1])/2)#np.concatenate()(cbedges2[1:] + cbedges2[:-1])/2))
+                y2 = ccbins/(len(clus_clus)*(ccedges[1]-ccedges[0]))
+                x2 = (ccedges[1:] + ccedges[:-1])/2
+
+                bkde = gaussian_kde(clus_back['rdiff'])
+                has_clustered = (len(clus_clus) > 1)
+                if has_clustered:
+                    ckde = gaussian_kde(clus_clus['rdiff'])#, h=0.01)
+                    csample_x = np.linspace(-backg,backg,100)
+                    ckde_y = ckde.evaluate(csample_x)
+                else:
+                    print('no "clustered" galaxies!')
+                bsample_x = np.linspace(-1, 1, 100)
+                bkde_y = bkde.evaluate(bsample_x)
+
+                # Draw z's ###CHECK THIS####
+                if clusfrac_override is not None:
+                    clus_frac = clusfrac_override
+                else:  
+                    clus_frac = res.x[0]/len(selclus)
+                #maxz = max(selectclus['Z'])
+                #for row in fittab:
+                mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
+                while np.count_nonzero(mask) > 0:
+                    mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
+                    back = (mistab['randnum'] > clus_frac)
+                    if has_clustered:
+                        clus = (mistab['randnum'] < clus_frac)
+                        mistab['R'][mask & clus] = mistab[mask & clus]['r_n0'] + np.random.normal(0.0, res.x[1], np.count_nonzero(mask & clus))
+                    if skip_background:
+                        mask = mask & (~back)
+                        if not has_clustered:
+                            break
+                
+                select_miss = mistab[(mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp)]
+                rdiff_new = select_miss['R'] - select_miss['r_n0']
+                miss_clus_mask = (rdiff_new < backg) & (rdiff_new > -1*backg)
+                mistab['Z'] = self._inverse_comoving_radial_dist(mistab['R'])
+                # data collection
+                binnum.append(i+(j*(len(self.r_edges)-1))) 
+                minrs.append(minr)
+                maxrs.append(maxr)
+                minsperps.append(minsperp)
+                maxsperps.append(maxsperp)
+                nominalfrac.append(len(clus_clus)/len(selclus))
+                n_obsclus.append(len(clus_clus))
+                n_obsback.append(len(clus_back))
+                n_misclus.append(len(select_miss[miss_clus_mask]))
+                n_misback.append(len(select_miss[~miss_clus_mask]))
+                amp.append(res.x[0])
+                sig.append(res.x[1])
+                slope.append(res.x[2])
+                intercept.append(res.x[3])
+        self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, n_obsclus, n_obsback, n_misclus, n_misback, amp, sig, slope, intercept], names=names)
+        #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
+        #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
+        return mistab
+
+    def _fit(self, data, counts, bins):
+        width = bins[1] - bins[0]
+        params_g = (np.max(counts), np.std(data), 0, 0)
+        x = (bins[1:] + bins[:-1])/2
+        y_data = counts/width
+        tol = 0.00001
+        res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], tol=tol)
+        return res
+
+    @staticmethod
+    def model(x, params):
+        return params[0]*np.exp(-x**2/(2*params[1]**2)) + params[2]*x + params[3]
+    
+    @staticmethod
+    def gauss(x, params):
+        return params[0]*np.exp(-x**2/(2*params[1]**2))
+    
+    def error(self, params, args):
+        return np.sum((args[0] - self.model(args[1], params))**2)
+
+
+
     def _inverse_comoving_radial_dist(self, r):
         '''
         Inverse of cosmo.comoving_radial_distance since tabulatedDESI does not have it
