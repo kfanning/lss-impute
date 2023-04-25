@@ -552,7 +552,7 @@ class ImputeModel():
         x = (bins[1:] + bins[:-1])/2
         y_data = counts/width
         tol = 0.001
-        res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], bounds=[(0, 5*params_g[0]), (0.01, 5*params_g[1]), (0, 5*params_g[0]), (0, 5*params_g[0])], tol=tol)
+        res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], bounds=[(0, 5*params_g[0]), (0.0001, 10*params_g[1]), (0, 5*params_g[0]), (0, 5*params_g[0])], tol=tol)
         return res
 
     @staticmethod
