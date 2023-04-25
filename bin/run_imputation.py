@@ -12,6 +12,9 @@ parser.add_argument('--impversion', '-i', default=None, help='override version f
 parser.add_argument('--nobackground', '-nb', action='store_true', help='Skip imputing "background" (close to random) galaxies.')
 parser.add_argument('--overwrite', '-o', action='store_true', help='Set flag to allow overwriting of existing files')
 parser.add_argument('--physical', '-p', action='store_true', help='Set flag to use physical units (S_perp, R) instead of Z and angular distance.')
+parser.add_argument('--fit', '-f', action='store_true', help='Set flag to use model fit rather than KDE (physical units only).')
+parser.add_argument('--radial_bins', '-rb', default=15, help='Number of radial bins to use')
+parser.add_argument('--perp_bins', '-pb', default=18, help='Number of perpendicular bins to use')
 
 # add dir management
 # catdir (for base catalogs for reading, no writing)
@@ -68,9 +71,9 @@ obs_nncat = vstack([obs_nncat_n, obs_nncat_s])
 
 #run imputation
 impn = impute.ImputeModel(obs_nncat, mis_nncat_n)
-impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical)
+impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit)
 imps = impute.ImputeModel(obs_nncat, mis_nncat_s)
-imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical)
+imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit)
 
 imps.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_S_impute_details.fits'), overwrite=uargs.overwrite)
 impn.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_N_impute_details.fits'), overwrite=uargs.overwrite)

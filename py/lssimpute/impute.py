@@ -33,54 +33,56 @@ class ImputeModel():
         self.backg_Z = 0.01
         return
 
-    def bin_angular(self):
+    def bin_angular(self, nbins=18):
         #Ang dist binning
         maxbin = np.max(self.misscat['angdist_n0'])#np.min((np.max(tab['angdist_n0']), np.max(clusN['angdist_n1'])))
         print(maxbin)
-        nbins = 18
+        #nbins = 18
         selectclus = self.cluscat[self.cluscat['angdist_n0'] < maxbin]
         self.ang_misbins, self.ang_edges = np.histogram(self.misscat['angdist_n0'], range=(0,maxbin), bins=nbins)
         self.ang_clusbins, clusedges = np.histogram(selectclus['angdist_n0'], range=(0,maxbin), bins=nbins)
-        # merge bins 6,7 and 8-14
-        mergebin = 6
-        maskb = np.ones(len(self.ang_misbins))
-        #maskb[7] = 0
-        maskb[mergebin:-1] = 0
-        maske = np.ones(len(self.ang_edges))
-        #maske[7] = 0
-        maske[mergebin+1:-1] = 0
-        #misbins[6] += misbins[7]
-        #clusbins[6] += clusbins[7]
-        self.ang_misbins[-1] += np.sum(self.ang_misbins[mergebin:])
-        self.ang_clusbins[-1] += np.sum(self.ang_clusbins[mergebin:])
-        self.ang_misbins = np.extract(maskb, self.ang_misbins)
-        self.ang_edges = np.extract(maske, self.ang_edges)
-        self.ang_clusbins = np.extract(maskb, self.ang_clusbins)
-        self.did_angbin = True
+        if nbins==18:
+            # merge bins 6,7 and 8-14
+            mergebin = 6
+            maskb = np.ones(len(self.ang_misbins))
+            #maskb[7] = 0
+            maskb[mergebin:-1] = 0
+            maske = np.ones(len(self.ang_edges))
+            #maske[7] = 0
+            maske[mergebin+1:-1] = 0
+            #misbins[6] += misbins[7]
+            #clusbins[6] += clusbins[7]
+            self.ang_misbins[-1] += np.sum(self.ang_misbins[mergebin:])
+            self.ang_clusbins[-1] += np.sum(self.ang_clusbins[mergebin:])
+            self.ang_misbins = np.extract(maskb, self.ang_misbins)
+            self.ang_edges = np.extract(maske, self.ang_edges)
+            self.ang_clusbins = np.extract(maskb, self.ang_clusbins)
+            self.did_angbin = True
         return
 
-    def bin_sperp(self):
+    def bin_sperp(self, nbins=18):
         #S_perp dist binning
         maxbin = np.max(self.misscat['sperp_n0'])
-        nbins = 18
+        #nbins = 18
         selectclus = self.cluscat[self.cluscat['sperp_n0'] < maxbin]
         self.sperp_misbins, self.sperp_edges = np.histogram(self.misscat['sperp_n0'], range=(0,maxbin), bins=nbins)
         self.sperp_clusbins, clusedges = np.histogram(selectclus['sperp_n0'], range=(0,maxbin), bins=nbins)
-        # merge bins 6,7 and 8-14
-        mergebin = 6
-        maskb = np.ones(len(self.sperp_misbins))
-        #maskb[7] = 0
-        maskb[mergebin:-1] = 0
-        maske = np.ones(len(self.sperp_edges))
-        #maske[7] = 0
-        maske[mergebin+1:-1] = 0
-        #misbins[6] += misbins[7]
-        #clusbins[6] += clusbins[7]
-        self.sperp_misbins[-1] += np.sum(self.sperp_misbins[mergebin:])
-        self.sperp_clusbins[-1] += np.sum(self.sperp_clusbins[mergebin:])
-        self.sperp_misbins = np.extract(maskb, self.sperp_misbins)
-        self.sperp_edges = np.extract(maske, self.sperp_edges)
-        self.sperp_clusbins = np.extract(maskb, self.sperp_clusbins)
+        if nbins==18:
+            # merge bins 6,7 and 8-14
+            mergebin = 6
+            maskb = np.ones(len(self.sperp_misbins))
+            #maskb[7] = 0
+            maskb[mergebin:-1] = 0
+            maske = np.ones(len(self.sperp_edges))
+            #maske[7] = 0
+            maske[mergebin+1:-1] = 0
+            #misbins[6] += misbins[7]
+            #clusbins[6] += clusbins[7]
+            self.sperp_misbins[-1] += np.sum(self.sperp_misbins[mergebin:])
+            self.sperp_clusbins[-1] += np.sum(self.sperp_clusbins[mergebin:])
+            self.sperp_misbins = np.extract(maskb, self.sperp_misbins)
+            self.sperp_edges = np.extract(maske, self.sperp_edges)
+            self.sperp_clusbins = np.extract(maskb, self.sperp_clusbins)
         self.did_sperpbin = True
         return
 
@@ -101,71 +103,73 @@ class ImputeModel():
             plt.show()
         return fig
 
-    def bin_z(self):
+    def bin_z(self, nbins=15):
         #nn z binning
         # loooking at nn redshift
         maxbin = max([np.max(self.misscat['z_n0']), np.max(self.cluscat['z_n0'])]) #1.1
         minbin = min([np.min(self.misscat['z_n0']), np.min(self.cluscat['z_n0'])]) #0.4# might want to use range of all data?
-        nbins = 15#18 #20
+        #nbins = 15#18 #20
         selectclus2 = self.cluscat[(self.cluscat['z_n0'] < maxbin) & (self.cluscat['z_n0'] > minbin)]
         self.z_misbins, self.z_edges = np.histogram(self.misscat['z_n0'], range=(minbin,maxbin), bins=nbins)
         self.z_clusbins, _ = np.histogram(selectclus2['z_n0'], range=(minbin,maxbin), bins=nbins)
-        # merge first + last bins
-        num_merge = 3#4
-        mask = np.ones(len(self.z_misbins))
-        mask[1:num_merge+1] = 0
-        mask[-1*num_merge-1:-1] = 0
+        if nbins==15:
+            # merge first + last bins
+            num_merge = 3#4
+            mask = np.ones(len(self.z_misbins))
+            mask[1:num_merge+1] = 0
+            mask[-1*num_merge-1:-1] = 0
 
-        mask2 = np.ones(len(self.z_edges))
-        mask2[1:num_merge+1] = 0
-        mask2[-1*num_merge-1:-1] = 0
+            mask2 = np.ones(len(self.z_edges))
+            mask2[1:num_merge+1] = 0
+            mask2[-1*num_merge-1:-1] = 0
 
-        self.z_misbins[0] = np.sum(self.z_misbins[0:num_merge+1])
-        #misbins2[0] = misbins2[0] + misbins2[1] + misbins2[2] + misbins2[3]
-        self.z_clusbins[0] = np.sum(self.z_clusbins[0:num_merge+1])
-        #clusbins2[0] = clusbins2[0] + clusbins2[1] + clusbins2[2] + clusbins2[3]
-        self.z_misbins[-1] = np.sum(self.z_misbins[-1*num_merge-1:-1])
-        #misbins2[-1] = misbins2[-1] + misbins2[-2] + misbins2[-3] + misbins2[-4]
-        self.z_clusbins[-1] = np.sum(self.z_clusbins[-1*num_merge-1:-1])
-        #clusbins2[-1] = clusbins2[-1] + clusbins2[-2] + clusbins2[-3] + clusbins2[-4]
-        #print(misbins2)
-        self.z_misbins = np.extract(mask, self.z_misbins)
-        self.z_clusbins = np.extract(mask, self.z_clusbins)
-        self.z_edges = np.extract(mask2, self.z_edges)
+            self.z_misbins[0] = np.sum(self.z_misbins[0:num_merge+1])
+            #misbins2[0] = misbins2[0] + misbins2[1] + misbins2[2] + misbins2[3]
+            self.z_clusbins[0] = np.sum(self.z_clusbins[0:num_merge+1])
+            #clusbins2[0] = clusbins2[0] + clusbins2[1] + clusbins2[2] + clusbins2[3]
+            self.z_misbins[-1] = np.sum(self.z_misbins[-1*num_merge-1:-1])
+            #misbins2[-1] = misbins2[-1] + misbins2[-2] + misbins2[-3] + misbins2[-4]
+            self.z_clusbins[-1] = np.sum(self.z_clusbins[-1*num_merge-1:-1])
+            #clusbins2[-1] = clusbins2[-1] + clusbins2[-2] + clusbins2[-3] + clusbins2[-4]
+            #print(misbins2)
+            self.z_misbins = np.extract(mask, self.z_misbins)
+            self.z_clusbins = np.extract(mask, self.z_clusbins)
+            self.z_edges = np.extract(mask2, self.z_edges)
         self.did_zbin = True
         return
 
-    def bin_r(self):
+    def bin_r(self, nbins=15):
         #nn r binning
         # loooking at nn r
         maxbin = max([np.max(self.misscat['r_n0']), np.max(self.cluscat['r_n0'])]) #1.1
         minbin = min([np.min(self.misscat['r_n0']), np.min(self.cluscat['r_n0'])]) #0.4# might want to use range of all data?
-        nbins = 15#18 #20
+        #nbins = 15#18 #20
         selectclus2 = self.cluscat[(self.cluscat['r_n0'] < maxbin) & (self.cluscat['r_n0'] > minbin)]
         self.r_misbins, self.r_edges = np.histogram(self.misscat['r_n0'], range=(minbin,maxbin), bins=nbins)
         self.r_clusbins, _ = np.histogram(selectclus2['r_n0'], range=(minbin,maxbin), bins=nbins)
-        # merge first + last bins
-        num_merge = 3#4
-        mask = np.ones(len(self.r_misbins))
-        mask[1:num_merge+1] = 0
-        mask[-1*num_merge-1:-1] = 0
+        if nbins==15:
+            # merge first + last bins
+            num_merge = 3#4
+            mask = np.ones(len(self.r_misbins))
+            mask[1:num_merge+1] = 0
+            mask[-1*num_merge-1:-1] = 0
 
-        mask2 = np.ones(len(self.r_edges))
-        mask2[1:num_merge+1] = 0
-        mask2[-1*num_merge-1:-1] = 0
+            mask2 = np.ones(len(self.r_edges))
+            mask2[1:num_merge+1] = 0
+            mask2[-1*num_merge-1:-1] = 0
 
-        self.r_misbins[0] = np.sum(self.r_misbins[0:num_merge+1])
-        #misbins2[0] = misbins2[0] + misbins2[1] + misbins2[2] + misbins2[3]
-        self.r_clusbins[0] = np.sum(self.r_clusbins[0:num_merge+1])
-        #clusbins2[0] = clusbins2[0] + clusbins2[1] + clusbins2[2] + clusbins2[3]
-        self.r_misbins[-1] = np.sum(self.r_misbins[-1*num_merge-1:-1])
-        #misbins2[-1] = misbins2[-1] + misbins2[-2] + misbins2[-3] + misbins2[-4]
-        self.r_clusbins[-1] = np.sum(self.r_clusbins[-1*num_merge-1:-1])
-        #clusbins2[-1] = clusbins2[-1] + clusbins2[-2] + clusbins2[-3] + clusbins2[-4]
-        #print(misbins2)
-        self.r_misbins = np.extract(mask, self.r_misbins)
-        self.r_clusbins = np.extract(mask, self.r_clusbins)
-        self.r_edges = np.extract(mask2, self.r_edges)
+            self.r_misbins[0] = np.sum(self.r_misbins[0:num_merge+1])
+            #misbins2[0] = misbins2[0] + misbins2[1] + misbins2[2] + misbins2[3]
+            self.r_clusbins[0] = np.sum(self.r_clusbins[0:num_merge+1])
+            #clusbins2[0] = clusbins2[0] + clusbins2[1] + clusbins2[2] + clusbins2[3]
+            self.r_misbins[-1] = np.sum(self.r_misbins[-1*num_merge-1:-1])
+            #misbins2[-1] = misbins2[-1] + misbins2[-2] + misbins2[-3] + misbins2[-4]
+            self.r_clusbins[-1] = np.sum(self.r_clusbins[-1*num_merge-1:-1])
+            #clusbins2[-1] = clusbins2[-1] + clusbins2[-2] + clusbins2[-3] + clusbins2[-4]
+            #print(misbins2)
+            self.r_misbins = np.extract(mask, self.r_misbins)
+            self.r_clusbins = np.extract(mask, self.r_clusbins)
+            self.r_edges = np.extract(mask2, self.r_edges)
         self.did_rbin = True
         return
 
@@ -570,12 +574,15 @@ class ImputeModel():
         '''
         return np.interp(r, self.cosmo._comoving_radial_distance, self.cosmo._z, left=None, right=None)
 
-    def run(self, clusfrac_override=None, skip_background=False, physical=True):
+    def run(self, clusfrac_override=None, skip_background=False, physical=True, rbins=15, angbins=18, fit=False):
         if physical:
             # order here currently doesn't matter but it might be a good change to do a binning of sperp for each rbin
-            self.bin_r()
-            self.bin_sperp()
-            mistab = self.impute_physical(clusfrac_override=clusfrac_override, skip_background=skip_background)
+            self.bin_r(rbins)
+            self.bin_sperp(angbins)
+            if fit:
+                mistab = self.impute_physical_fit(clusfrac_override=clusfrac_override, skip_background=skip_background)
+            else:
+                mistab = self.impute_physical(clusfrac_override=clusfrac_override, skip_background=skip_background)
         else:
             self.bin_angular()
             self.bin_z()
