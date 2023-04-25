@@ -13,8 +13,8 @@ parser.add_argument('--nobackground', '-nb', action='store_true', help='Skip imp
 parser.add_argument('--overwrite', '-o', action='store_true', help='Set flag to allow overwriting of existing files')
 parser.add_argument('--physical', '-p', action='store_true', help='Set flag to use physical units (S_perp, R) instead of Z and angular distance.')
 parser.add_argument('--fit', '-f', action='store_true', help='Set flag to use model fit rather than KDE (physical units only).')
-parser.add_argument('--radial_bins', '-rb', default=15, help='Number of radial bins to use')
-parser.add_argument('--perp_bins', '-pb', default=18, help='Number of perpendicular bins to use')
+parser.add_argument('--radial_bins', '-rb', default=15, type=int, help='Number of radial bins to use')
+parser.add_argument('--perp_bins', '-pb', default=18, type=int, help='Number of perpendicular bins to use')
 
 # add dir management
 # catdir (for base catalogs for reading, no writing)
