@@ -71,9 +71,9 @@ obs_nncat = vstack([obs_nncat_n, obs_nncat_s])
 
 #run imputation
 impn = impute.ImputeModel(obs_nncat, mis_nncat_n)
-impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit)
+impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins)
 imps = impute.ImputeModel(obs_nncat, mis_nncat_s)
-imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit)
+imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins)
 
 imps.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_S_impute_details.fits'), overwrite=uargs.overwrite)
 impn.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_N_impute_details.fits'), overwrite=uargs.overwrite)
