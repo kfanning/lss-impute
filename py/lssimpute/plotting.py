@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy.table import Table, vstack, join
+from .impute import ImputeModel
 
 def uselato(self, fdir):
     import matplotlib as mpl
@@ -31,7 +32,6 @@ class validation_plots():
             for col in self.imputedetails.columns:
                 if 'FIT' in col:
                     self.fit = True
-                    from .impute import ImputeModel
                     break
         return
 
