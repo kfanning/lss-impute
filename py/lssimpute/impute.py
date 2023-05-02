@@ -448,6 +448,7 @@ class ImputeModel():
         minsperps = []
         maxsperps = []
         nominalfrac = []
+        fitfrac = []
         n_obsclus = []
         n_obsback = []
         n_misclus = []
