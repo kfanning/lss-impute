@@ -557,7 +557,7 @@ class ImputeModel():
         tol = 0.0000001
         print(params_g)
         res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], bounds=[(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])], tol=tol)
-        print(f'{self.error(params_g, [y_data, x]):.3f} -> {self.error(params_g, [y_data, x]):.3f}')
+        print(f'{self.error(params_g, [y_data, x]):.3f} -> {self.error(res.x [y_data, x]):.3f}')
         return res
 
     @staticmethod
