@@ -554,7 +554,7 @@ class ImputeModel():
         params_g = (np.max(counts), np.std(data), 0, 0)
         x = (bins[1:] + bins[:-1])/2
         y_data = counts#/width
-        tol = 0.00001
+        tol = 0.0000001
         print(params_g)
         res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], bounds=[(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])], tol=tol)
         return res
