@@ -26,6 +26,13 @@ class validation_plots():
         self.tracer = tracer
         self.region = region
         self.imputedetails = imputedetails
+        if self.imputedetails is not None:
+            self.fit = False
+            for col in self.imputedetails.columns:
+                if 'FIT' in col:
+                    self.fit = True
+                    from .impute import ImputeModel
+                    break
         return
 
     def n_z(self):
@@ -85,6 +92,8 @@ class validation_plots():
         return
 
     def imputation_fits(self, catver='observed', mode='physical'):
+        '''
+        '''
         if mode == 'physical':
             rname = 'R'
             runit = 'Mpc/h'
@@ -105,43 +114,56 @@ class validation_plots():
             backg = 0.01
         cat = self.cats[catver]
         rdiffs = cat[rname] - cat[f'{rname.lower()}_n0']
-        rmins = sorted(list(set(self.imputedetails[f'MIN_{rname}'])))
-        rmaxs = sorted(list(set(self.imputedetails[f'MAX_{rname}'])))
-        pmins = sorted(list(set(self.imputedetails[f'MIN_{perpcol}'])))
-        pmaxs = sorted(list(set(self.imputedetails[f'MAX_{perpcol}'])))
+        rmins = list(self.imputedetails[f'MIN_{rname}'])
+        rmaxs = list(self.imputedetails[f'MAX_{rname}'])
+        pmins = list(self.imputedetails[f'MIN_{perpcol}'])
+        pmaxs = list(self.imputedetails[f'MAX_{perpcol}'])
         binnum = list(self.imputedetails[f'BIN_NUM'])
+        if self.fit:
+            amp = list(self.imputedetails['FIT_AMPLITUDE'])
+            sig = list(self.imputedetails['FIT_SIGMA'])
+            slope = list(self.imputedetails['FIT_SLOPE'])
+            intercept = list(self.imputedetails['FIT_INTERCEPT'])
         figs = []
-        for j in range(len(pmins)):
-            for i in range(len(rmins)):
-                mask = (cat[rcatcol] < rmaxs[i]) & (cat[rcatcol] > rmins[i]) & (cat[pcatcol] > pmins[j]) & (cat[pcatcol] < pmaxs[j])
-                rdiffs = cat[mask][rname] - cat[mask][f'{rname.lower()}_n0']
-                fig, axs = plt.subplots(1,2)#, sharey=True)
-                fig.dpi=self.dpi
-                fig.suptitle(f'bin: {binnum[j+(i*(len(pmins)))]} / {rmins[i]:.3f}{runit} < {rname} < {rmaxs[i]:.3f}{runit}, {pmins[j]:.3f}{perpunit} < {perpname} < {pmaxs[j]:.3f}{perpunit}')
-                axs[0].set_ylabel('fraction of galaxies in bin')
-                axs[0].set_title('"Background" Pairs')
-                
-                clusmask = (rdiffs < backg) & (rdiffs > -1*backg)
-                clus = rdiffs[clusmask]
-                back = rdiffs[~clusmask]
-                cbbins, cbedges = np.histogram(back, bins=50)
-                ccbins, ccedges = np.histogram(clus, bins=50)
-                y1 = cbbins/len(rdiffs)
-                y2 = ccbins/len(rdiffs)
+        #for j in range(len(pmins)):
+        for i in range(len(rmins)):
+            mask = (cat[rcatcol] < rmaxs[i]) & (cat[rcatcol] > rmins[i]) & (cat[pcatcol] > pmins[i]) & (cat[pcatcol] < pmaxs[i])
+            rdiffs = cat[mask][rname] - cat[mask][f'{rname.lower()}_n0']
+            fig, axs = plt.subplots(1,2)#, sharey=True)
+            fig.dpi=self.dpi
+            fig.suptitle(f'bin: {binnum[i]} / {rmins[i]:.3f}{runit} < {rname} < {rmaxs[i]:.3f}{runit}, {pmins[i]:.3f}{perpunit} < {perpname} < {pmaxs[i]:.3f}{perpunit}')
+            axs[0].set_ylabel('fraction of galaxies in bin')
+            axs[0].set_title('"Background" Pairs')
+            
+            clusmask = (rdiffs < backg) & (rdiffs > -1*backg)
+            clus = rdiffs[clusmask]
+            back = rdiffs[~clusmask]
+            cbbins, cbedges = np.histogram(back, bins=50)
+            ccbins, ccedges = np.histogram(clus, bins=50)
+            y1 = cbbins
+            y2 = ccbins
+            if self.fit:
+                x = np.linspace(np.min(clus), np.max(clus), 50)
+                params = (amp[i], sig[i], slope[i], intercept[i])
+                y = ImputeModel.model(x, params)
+                axs[1].plot(x,y, 'k--', label='fit')
+            else:
+                y1 /= len(rdiffs)
+                y1 /= len(rdiffs)
 
-                axs[0].hist(cbedges[:-1], cbedges, weights=y1, color='b')
-                #axs[0].hist(cbedges2[:-1], cbedges2, weights=np.split(y1, 2)[1], color='b')
-                #axs[0].plot(x1, yfit1, 'k--')
-                #axs[0].plot(bsample_x, bkde_y, 'r-')
-                axs[0].set_xlabel(f'{rname} diff ({runit})')
+            axs[0].hist(cbedges[:-1], cbedges, weights=y1, color='b')
+            #axs[0].hist(cbedges2[:-1], cbedges2, weights=np.split(y1, 2)[1], color='b')
+            #axs[0].plot(x1, yfit1, 'k--')
+            #axs[0].plot(bsample_x, bkde_y, 'r-')
+            axs[0].set_xlabel(f'{rname} diff ({runit})')
 
-                axs[1].set_title('"Clustered" Pairs')
-                axs[1].hist(ccedges[:-1], ccedges, weights=y2, color='g')
-                #axs[1].plot(x2, yfit2, 'k--')
-                #if has_clustered:
-                #    axs[1].plot(csample_x, ckde_y, 'r-')
-                axs[1].set_xlabel(f'{rname} diff ({runit})')
-                figs.append(fig)
+            axs[1].set_title('"Clustered" Pairs')
+            axs[1].hist(ccedges[:-1], ccedges, weights=y2, color='g')
+            #axs[1].plot(x2, yfit2, 'k--')
+            #if has_clustered:
+            #    axs[1].plot(csample_x, ckde_y, 'r-')
+            axs[1].set_xlabel(f'{rname} diff ({runit})')
+            figs.append(fig)
         return figs
 
     def _find_zlims(self):
