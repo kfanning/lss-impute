@@ -441,7 +441,7 @@ class ImputeModel():
         mistab['R'] = np.zeros(len(mistab), dtype=np.float64) - 1
         mistab['Z'] = np.zeros(len(mistab), dtype=np.float64) - 1
         # data storage
-        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK', 'FIT_AMPLITUDE', 'FIT_SIGMA', 'FIT_SLOPE', 'FIT_INTERCEPT']
+        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'CALC_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK', 'FIT_AMPLITUDE', 'FIT_SIGMA', 'FIT_SLOPE', 'FIT_INTERCEPT']
         binnum = []
         minrs = []
         maxrs = []
@@ -533,6 +533,7 @@ class ImputeModel():
                 minsperps.append(minsperp)
                 maxsperps.append(maxsperp)
                 nominalfrac.append(len(clus_clus)/len(selclus))
+                fitfrac.append(clus_frac)
                 n_obsclus.append(len(clus_clus))
                 n_obsback.append(len(clus_back))
                 n_misclus.append(len(select_miss[miss_clus_mask]))
@@ -541,7 +542,7 @@ class ImputeModel():
                 sig.append(res.x[1])
                 slope.append(res.x[2])
                 intercept.append(res.x[3])
-        self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, n_obsclus, n_obsback, n_misclus, n_misback, amp, sig, slope, intercept], names=names)
+        self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, fitfrac, n_obsclus, n_obsback, n_misclus, n_misback, amp, sig, slope, intercept], names=names)
         #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
@@ -552,7 +553,7 @@ class ImputeModel():
         params_g = (np.max(counts), np.std(data), 0, 0)
         x = (bins[1:] + bins[:-1])/2
         y_data = counts#/width
-        tol = 0.001
+        tol = 0.00001
         print(params_g)
         res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], bounds=[(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])], tol=tol)
         return res
