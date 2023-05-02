@@ -138,8 +138,8 @@ class validation_plots():
             clusmask = (rdiffs < backg) & (rdiffs > -1*backg)
             clus = rdiffs[clusmask]
             back = rdiffs[~clusmask]
-            cbbins, cbedges = np.histogram(back, bins=50)
-            ccbins, ccedges = np.histogram(clus, bins=50)
+            cbbins, cbedges = np.histogram(back, bins=50, density=False)
+            ccbins, ccedges = np.histogram(clus, bins=50, density=False)
             y1 = cbbins
             y2 = ccbins
             if self.fit:

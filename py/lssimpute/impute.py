@@ -484,7 +484,7 @@ class ImputeModel():
                 #cbbins2, cbedges2 = np.histogram(clus_back[clusback['zdiff'] > backg]['zdiff'], bins=50)#, range=(-0.01,0.01))
                 ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=50)#, range=(-0.01,0.01))
 
-                res = self._fit(clus_clus['rdiff'], ccbins, ccedges)
+                res = self._fit(clus_clus['rdiff'])
                 print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
 
                 y1 = cbbins/(len(clus_back)*(cbedges[1]-cbedges[0]))
@@ -507,7 +507,7 @@ class ImputeModel():
                 if clusfrac_override is not None:
                     clus_frac = clusfrac_override
                 else:  
-                    clus_frac = res.x[0]/len(selclus)
+                    clus_frac = res.x[0]*res.x[1]*np.sqrt(2*np.pi)/len(selclus)
                 #maxz = max(selectclus['Z'])
                 #for row in fittab:
                 mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
@@ -546,14 +546,15 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
-    def _fit(self, data, counts, bins):
+    def _fit(self, data):
         #width = bins[1] - bins[0]
+        counts, bins = np.histogram(data, bins=50, density=False)
         params_g = (np.max(counts), np.std(data), 0, 0)
         x = (bins[1:] + bins[:-1])/2
         y_data = counts#/width
         tol = 0.001
         print(params_g)
-        res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], bounds=[(0, 5*params_g[0]), (0.0001, 10*params_g[1]), (0, 5*params_g[0]), (0, 5*params_g[0])], tol=tol)
+        res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], bounds=[(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])], tol=tol)
         return res
 
     @staticmethod
