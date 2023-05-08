@@ -545,11 +545,11 @@ class ImputeModel():
                 x = np.linspace(np.min(clus_clus['rdiff']), np.max(clus_clus['rdiff']), 50)
                 y = self.model(x, res.x)
                 axs[1].plot(x,y, 'k-', label='fit')
-                axs[0].hist(cbedges[:-1], cbedges, weights=ccbins, color='b')
+                axs[0].hist(cbedges[:-1], cbedges, weights=cbbins, color='b')
                 axs[0].set_xlabel(f'{rname} diff ({runit})')
 
                 axs[1].set_title('"Clustered" Pairs')
-                axs[1].hist(ccedges[:-1], ccedges, weights=ccedges, color='g')
+                axs[1].hist(ccedges[:-1], ccedges, weights=ccbins, color='g')
                 axs[1].set_xlabel(f'{rname} diff ({runit})')
                 self.figs.append(fig)
 
