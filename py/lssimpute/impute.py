@@ -457,6 +457,7 @@ class ImputeModel():
         sig = []
         slope = []
         intercept = []
+        self.figs = []
 
         for j in range(len(self.sperp_edges)-1): #misedges is nn_angdist
             for i in range(len(self.r_edges)-1): #misedges2 is nn_z
@@ -536,7 +537,6 @@ class ImputeModel():
                 perpcol = 'SPERPDIST'
                 rcatcol = 'r_n0'
                 pcatcol = 'sperp_n0'
-                self.figs = []
                 fig, axs = plt.subplots(1,2)#, sharey=True)
                 fig.dpi=200
                 fig.suptitle(f'bin: {i+(j*(len(self.r_edges)-1))} / {minr:.3f}{runit} < {rname} < {maxr:.3f}{runit}, {minsperp:.3f}{perpunit} < {perpname} < {maxsperp:.3f}{perpunit}')
