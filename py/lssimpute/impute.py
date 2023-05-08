@@ -539,7 +539,7 @@ class ImputeModel():
                 self.figs = []
                 fig, axs = plt.subplots(1,2)#, sharey=True)
                 fig.dpi=200
-                fig.suptitle(f'bin: {binnum[i]} / {minr:.3f}{runit} < {rname} < {maxr:.3f}{runit}, {minsperp:.3f}{perpunit} < {perpname} < {maxsperp:.3f}{perpunit}')
+                fig.suptitle(f'bin: {i+(j*(len(self.r_edges)-1))} / {minr:.3f}{runit} < {rname} < {maxr:.3f}{runit}, {minsperp:.3f}{perpunit} < {perpname} < {maxsperp:.3f}{perpunit}')
                 axs[0].set_ylabel('fraction of galaxies in bin')
                 axs[0].set_title('"Background" Pairs')
                 x = np.linspace(np.min(clus_clus['rdiff']), np.max(clus_clus['rdiff']), 50)
