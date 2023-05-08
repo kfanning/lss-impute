@@ -3,6 +3,8 @@ import argparse
 from astropy.table import Table, vstack
 from lssimpute import dirs, cat, impute
 from LSS.tabulated_cosmo import TabulatedDESI
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--tracer', '-t', default='LRG', help='Which LSS tracer catalogs to run on (LRG, ELG, QSO)')
@@ -72,8 +74,20 @@ obs_nncat = vstack([obs_nncat_n, obs_nncat_s])
 #run imputation
 impn = impute.ImputeModel(obs_nncat, mis_nncat_n)
 impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins)
+figs = impn.figs
+filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_model_bins_live.pdf'
+with PdfPages(filename) as pdf:
+    for fig in figs:
+        pdf.savefig(fig)
+        plt.close(fig)
 imps = impute.ImputeModel(obs_nncat, mis_nncat_s)
 imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins)
+figs = imps.figs
+filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_model_bins_live.pdf'
+with PdfPages(filename) as pdf:
+    for fig in figs:
+        pdf.savefig(fig)
+        plt.close(fig)
 
 imps.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_S_impute_details.fits'), overwrite=uargs.overwrite)
 impn.impute_details.write(os.path.join(stagedir, f'{uargs.tracer}_N_impute_details.fits'), overwrite=uargs.overwrite)

@@ -527,6 +527,32 @@ class ImputeModel():
                 rdiff_new = select_miss['R'] - select_miss['r_n0']
                 miss_clus_mask = (rdiff_new < backg) & (rdiff_new > -1*backg)
                 mistab['Z'] = self._inverse_comoving_radial_dist(mistab['R'])
+
+                #Plot
+                rname = 'R'
+                runit = 'Mpc/h'
+                perpname = '$S_\perp$'
+                perpunit = 'Mpc/h'
+                perpcol = 'SPERPDIST'
+                rcatcol = 'r_n0'
+                pcatcol = 'sperp_n0'
+                self.figs = []
+                fig, axs = plt.subplots(1,2)#, sharey=True)
+                fig.dpi=200
+                fig.suptitle(f'bin: {binnum[i]} / {minr:.3f}{runit} < {rname} < {maxr:.3f}{runit}, {minsperp:.3f}{perpunit} < {perpname} < {maxsperp:.3f}{perpunit}')
+                axs[0].set_ylabel('fraction of galaxies in bin')
+                axs[0].set_title('"Background" Pairs')
+                x = np.linspace(np.min(clus_clus['rdiff']), np.max(clus_clus['rdiff']), 50)
+                y = self.model(x, res.x)
+                axs[1].plot(x,y, 'k-', label='fit')
+                axs[0].hist(cbedges[:-1], cbedges, weights=ccbins, color='b')
+                axs[0].set_xlabel(f'{rname} diff ({runit})')
+
+                axs[1].set_title('"Clustered" Pairs')
+                axs[1].hist(ccedges[:-1], ccedges, weights=ccedges, color='g')
+                axs[1].set_xlabel(f'{rname} diff ({runit})')
+                self.figs.append(fig)
+
                 # data collection
                 binnum.append(i+(j*(len(self.r_edges)-1))) 
                 minrs.append(minr)
@@ -557,7 +583,7 @@ class ImputeModel():
         tol = 0.0000001
         print(params_g)
         res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], bounds=[(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])], tol=tol)
-        print(f'{self.error(params_g, [y_data, x]):.3f} -> {self.error(res.x [y_data, x]):.3f}')
+        print(f'{self.error(params_g, [y_data, x]):.3f} -> {self.error(res.x, [y_data, x]):.3f}')
         return res
 
     @staticmethod

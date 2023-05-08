@@ -149,7 +149,7 @@ class validation_plots():
                 axs[1].plot(x,y, 'k--', label='fit')
             else:
                 y1 /= len(rdiffs)
-                y1 /= len(rdiffs)
+                y2 /= len(rdiffs)
 
             axs[0].hist(cbedges[:-1], cbedges, weights=y1, color='b')
             #axs[0].hist(cbedges2[:-1], cbedges2, weights=np.split(y1, 2)[1], color='b')
