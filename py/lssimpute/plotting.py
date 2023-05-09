@@ -91,7 +91,7 @@ class validation_plots():
     def imputation_bins(self):
         return
 
-    def imputation_fits(self, catver='observed', mode='physical'):
+    def imputation_fits(self, catver='observed', mode='physical', fit_type='gauss'):
         '''
         '''
         if mode == 'physical':
@@ -121,9 +121,10 @@ class validation_plots():
         binnum = list(self.imputedetails[f'BIN_NUM'])
         if self.fit:
             amp = list(self.imputedetails['FIT_AMPLITUDE'])
-            sig = list(self.imputedetails['FIT_SIGMA'])
+            sig = list(self.imputedetails['FIT_WIDTH'])
             slope = list(self.imputedetails['FIT_SLOPE'])
             intercept = list(self.imputedetails['FIT_INTERCEPT'])
+            quad = list(self.imputedetails['FIT_QUAD'])
         figs = []
         #for j in range(len(pmins)):
         for i in range(len(rmins)):
@@ -143,8 +144,15 @@ class validation_plots():
             y1 = cbbins
             y2 = ccbins
             if self.fit:
-                x = np.linspace(np.min(clus), np.max(clus), 50)
                 params = (amp[i], sig[i], slope[i], intercept[i])
+                if fit_type == 'gauss':
+                    model = ImputeModel.model
+                elif fit_type == 'lorentz':
+                    model = ImputeModel.model_lorentz
+                elif fit_type == 'quad':
+                    model = ImputeModel.model_quad
+                    params = (amp[i], sig[i], slope[i], intercept[i], quad[i])
+                x = np.linspace(np.min(clus), np.max(clus), 50)
                 y = ImputeModel.model(x, params)
                 axs[1].plot(x,y, 'k--', label='fit')
             else:

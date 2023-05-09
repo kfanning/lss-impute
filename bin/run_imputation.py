@@ -17,7 +17,7 @@ parser.add_argument('--physical', '-p', action='store_true', help='Set flag to u
 parser.add_argument('--fit', '-f', action='store_true', help='Set flag to use model fit rather than KDE (physical units only).')
 parser.add_argument('--radial_bins', '-rb', default=15, type=int, help='Number of radial bins to use')
 parser.add_argument('--perp_bins', '-pb', default=18, type=int, help='Number of perpendicular bins to use')
-
+parser.add_argument('--fit_type', '-ft', default='gauss', type=str, help='Type of fit to use (gauss, quad or lorentz)')
 # add dir management
 # catdir (for base catalogs for reading, no writing)
 # temp dir (intermediate files like logging, nn cats, etc)
@@ -69,19 +69,19 @@ obs_nncat_n.write(os.path.join(stagedir, f'{uargs.tracer}_N_clustering.dat.fits'
 obs_nncat_s.write(os.path.join(stagedir, f'{uargs.tracer}_S_clustering.dat.fits'), overwrite=uargs.overwrite)
 
 #merge both obs cause why not (maybe not idk for now)
-obs_nncat = vstack([obs_nncat_n, obs_nncat_s])
+#obs_nncat = vstack([obs_nncat_n, obs_nncat_s])
 
 #run imputation
-impn = impute.ImputeModel(obs_nncat, mis_nncat_n)
-impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins)
+impn = impute.ImputeModel(obs_nncat_n, mis_nncat_n)
+impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type)
 figs = impn.figs
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_model_bins_live.pdf'
 with PdfPages(filename) as pdf:
     for fig in figs:
         pdf.savefig(fig)
         plt.close(fig)
-imps = impute.ImputeModel(obs_nncat, mis_nncat_s)
-imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins)
+imps = impute.ImputeModel(obs_nncat_s, mis_nncat_s)
+imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type)
 figs = imps.figs
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_model_bins_live.pdf'
 with PdfPages(filename) as pdf:

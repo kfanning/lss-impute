@@ -434,14 +434,17 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
-    def impute_physical_fit(self, clusfrac_override=None, skip_background=True):
+    def impute_physical_fit(self, clusfrac_override=None, skip_background=True, fit_type='gauss'):
+        fit_type = fit_type.lower()
+        assert fit_type in ['gauss', 'lorentz', 'quad'], f'Invalid fit_type {fit_type}'
+
         #impute model
         mistab = self.misscat.copy()
         mistab['randnum'] = np.random.random_sample(len(mistab))
         mistab['R'] = np.zeros(len(mistab), dtype=np.float64) - 1
         mistab['Z'] = np.zeros(len(mistab), dtype=np.float64) - 1
         # data storage
-        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'CALC_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK', 'FIT_AMPLITUDE', 'FIT_SIGMA', 'FIT_SLOPE', 'FIT_INTERCEPT']
+        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'CALC_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK', 'FIT_AMPLITUDE', 'FIT_WIDTH', 'FIT_SLOPE', 'FIT_INTERCEPT', 'FIT_QUAD']
         binnum = []
         minrs = []
         maxrs = []
@@ -457,6 +460,7 @@ class ImputeModel():
         sig = []
         slope = []
         intercept = []
+        quad = []
         self.figs = []
 
         for j in range(len(self.sperp_edges)-1): #misedges is nn_angdist
@@ -508,8 +512,10 @@ class ImputeModel():
                 # Draw z's ###CHECK THIS####
                 if clusfrac_override is not None:
                     clus_frac = clusfrac_override
-                else:  
+                elif fit_type in ['gauss','quad']:  
                     clus_frac = res.x[0]*res.x[1]*np.sqrt(2*np.pi)/len(selclus)
+                elif fit_type == 'lorentz':
+                    clus_frac = res.x[0]*res.x[1].np.pi/len(selclus)
                 #maxz = max(selectclus['Z'])
                 #for row in fittab:
                 mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
@@ -518,6 +524,10 @@ class ImputeModel():
                     back = (mistab['randnum'] > clus_frac)
                     if has_clustered:
                         clus = (mistab['randnum'] < clus_frac)
+                        if fit_type in ['gauss','quad']:
+                            sample = np.random.normal(0.0, res.x[1], np.count_nonzero(mask & clus))
+                        elif fit_type == 'lorentz':
+                            sample = res.x[1]*np.random.standard_cauchy(np.count_nonzero(mask & clus)) #lorentz works this way?
                         mistab['R'][mask & clus] = mistab[mask & clus]['r_n0'] + np.random.normal(0.0, res.x[1], np.count_nonzero(mask & clus))
                     if skip_background:
                         mask = mask & (~back)
@@ -569,6 +579,10 @@ class ImputeModel():
                 sig.append(res.x[1])
                 slope.append(res.x[2])
                 intercept.append(res.x[3])
+                if fit_type == 'quad':
+                    quad.append(res.x[4])
+                else:
+                    quad.append(0)
         self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, fitfrac, n_obsclus, n_obsback, n_misclus, n_misback, amp, sig, slope, intercept], names=names)
         #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
@@ -589,6 +603,14 @@ class ImputeModel():
     @staticmethod
     def model(x, params):
         return params[0]*np.exp(-x**2/(2*params[1]**2)) + params[2]*x + params[3]
+
+    @staticmethod
+    def model_lorentz(x, params):
+        return params[0]*(params[1]**2/(x**2 + params[1]**2)) + params[2]*x + params[3]
+
+    @staticmethod
+    def model_quad(x, params):
+        return params[0]*np.exp(-x**2/(2*params[1]**2)) + params[2]*x + params[3] + params[4]*x**2
     
     @staticmethod
     def gauss(x, params):
@@ -596,6 +618,12 @@ class ImputeModel():
     
     def error(self, params, args):
         return np.sum((args[0] - self.model(args[1], params))**2)
+
+    def error_lorentz(self, params, args):
+        return np.sum((args[0] - self.model_lorentz(args[1], params))**2)
+
+    def error_quad(self, params, args):
+        return np.sum((args[0] - self.model_quad(args[1], params))**2)
 
 
 
@@ -605,13 +633,13 @@ class ImputeModel():
         '''
         return np.interp(r, self.cosmo._comoving_radial_distance, self.cosmo._z, left=None, right=None)
 
-    def run(self, clusfrac_override=None, skip_background=False, physical=True, rbins=15, angbins=18, fit=False):
+    def run(self, clusfrac_override=None, skip_background=False, physical=True, rbins=15, angbins=18, fit=False, fit_type='gauss'):
         if physical:
             # order here currently doesn't matter but it might be a good change to do a binning of sperp for each rbin
             self.bin_r(rbins)
             self.bin_sperp(angbins)
             if fit:
-                mistab = self.impute_physical_fit(clusfrac_override=clusfrac_override, skip_background=skip_background)
+                mistab = self.impute_physical_fit(clusfrac_override=clusfrac_override, skip_background=skip_background, fit_type=fit_type)
             else:
                 mistab = self.impute_physical(clusfrac_override=clusfrac_override, skip_background=skip_background)
         else:
