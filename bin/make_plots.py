@@ -46,7 +46,7 @@ fig = plotter.fraction_bin()
 fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_clusfrac.pdf')
 plt.close(fig)
 mode = 'physical' if uargs.physical else None
-figs = plotter.imputation_fits(mode=mode, fit_type=fit_type)
+figs = plotter.imputation_fits(mode=mode, fit_type=uargs.fit_type)
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_model_bins.pdf'
 with PdfPages(filename) as pdf:
     for fig in figs:
@@ -64,7 +64,7 @@ fig = plotter.fraction_bin()
 fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_clusfrac.pdf')
 plt.close(fig)
 mode = 'physical' if uargs.physical else None
-figs = plotter.imputation_fits(mode=mode)
+figs = plotter.imputation_fits(mode=mode, fit_type=uargs.fit_type)
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_model_bins.pdf'
 with PdfPages(filename) as pdf:
     for fig in figs:
