@@ -490,7 +490,7 @@ class ImputeModel():
                 #cbbins2, cbedges2 = np.histogram(clus_back[clusback['zdiff'] > backg]['zdiff'], bins=50)#, range=(-0.01,0.01))
                 ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=50)#, range=(-0.01,0.01))
 
-                res = self._fit(clus_clus['rdiff'])
+                res = self._fit(clus_clus['rdiff'], fit_type=fit_type)
                 print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
 
                 y1 = cbbins/(len(clus_back)*(cbedges[1]-cbedges[0]))
@@ -498,6 +498,7 @@ class ImputeModel():
                 y2 = ccbins/(len(clus_clus)*(ccedges[1]-ccedges[0]))
                 x2 = (ccedges[1:] + ccedges[:-1])/2
 
+                '''
                 bkde = gaussian_kde(clus_back['rdiff'])
                 has_clustered = (len(clus_clus) > 1)
                 if has_clustered:
@@ -508,6 +509,7 @@ class ImputeModel():
                     print('no "clustered" galaxies!')
                 bsample_x = np.linspace(-1, 1, 100)
                 bkde_y = bkde.evaluate(bsample_x)
+                '''
 
                 # Draw z's ###CHECK THIS####
                 if clusfrac_override is not None:
@@ -588,15 +590,24 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
-    def _fit(self, data):
+    def _fit(self, data, fit_type='gauss'):
         #width = bins[1] - bins[0]
         counts, bins = np.histogram(data, bins=50, density=False)
         params_g = (np.max(counts), np.std(data), 0, 0)
+        bounds = [(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])]
+        if fit_type == 'gauss':
+            objective = self.error
+        elif fit_type == 'lorentz':
+            objective = self.error_lorentz
+        elif fit_type == 'quad':
+            objective = self.error_quad
+            bounds.append((None, None))
+            params_g = (np.max(counts), np.std(data), 0, 0, 0)
         x = (bins[1:] + bins[:-1])/2
         y_data = counts#/width
         tol = 0.0000001
         print(params_g)
-        res = scipy.optimize.minimize(self.error, params_g, args=[y_data, x], bounds=[(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])], tol=tol)
+        res = scipy.optimize.minimize(objective, params_g, args=[y_data, x], bounds=bounds, tol=tol)
         print(f'{self.error(params_g, [y_data, x]):.3f} -> {self.error(res.x, [y_data, x]):.3f}')
         return res
 
