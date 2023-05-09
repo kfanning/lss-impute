@@ -498,9 +498,9 @@ class ImputeModel():
                 y2 = ccbins/(len(clus_clus)*(ccedges[1]-ccedges[0]))
                 x2 = (ccedges[1:] + ccedges[:-1])/2
 
+                has_clustered = (len(clus_clus) > 1)
                 '''
                 bkde = gaussian_kde(clus_back['rdiff'])
-                has_clustered = (len(clus_clus) > 1)
                 if has_clustered:
                     ckde = gaussian_kde(clus_clus['rdiff'])#, h=0.01)
                     csample_x = np.linspace(-backg,backg,100)
@@ -517,7 +517,7 @@ class ImputeModel():
                 elif fit_type in ['gauss','quad']:  
                     clus_frac = res.x[0]*res.x[1]*np.sqrt(2*np.pi)/len(selclus)
                 elif fit_type == 'lorentz':
-                    clus_frac = res.x[0]*res.x[1].np.pi/len(selclus)
+                    clus_frac = res.x[0]*res.x[1]*np.pi/len(selclus)
                 #maxz = max(selectclus['Z'])
                 #for row in fittab:
                 mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
