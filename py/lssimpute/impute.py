@@ -72,7 +72,7 @@ class ImputeModel():
             mergebin = 6
             maskb = np.ones(len(self.sperp_misbins))
             #maskb[7] = 0
-            maskb[mergebin:-1] = 0
+            maskb[mergebin:-1] = 0sperp_edges
             maske = np.ones(len(self.sperp_edges))
             #maske[7] = 0
             maske[mergebin+1:-1] = 0
@@ -481,13 +481,7 @@ class ImputeModel():
                 clus_clus = selclus[clusmask]
                 clus_back = selclus[~clusmask]
 
-                #ccbins1, cbedges1 = np.histogram(clus_back['zdiff'], bins=25, range=(min(clus_back['zdiff']), -backg))
-                #ccbins2, cbedges2 =  np.histogram(clus_back['zdiff'], bins=25, range=(backg, max(clus_back['zdiff'])))
-                #cbbins = np.concatenate((ccbins1, ccbins2))
-                #cbedges = np.concatenate((cbedges1, cbedges2))
                 cbbins, cbedges = np.histogram(clus_back['rdiff'], bins=50)#, range=(-0.01,0.01))
-                #cbbins1, cbedges1 = np.histogram(clus_back[clusback['zdiff'] < -1*backg]['zdiff'], bins=50)#, range=(-0.01,0.01))
-                #cbbins2, cbedges2 = np.histogram(clus_back[clusback['zdiff'] > backg]['zdiff'], bins=50)#, range=(-0.01,0.01))
                 ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=50)#, range=(-0.01,0.01))
 
                 res = self._fit(clus_clus['rdiff'], fit_type=fit_type)
@@ -499,17 +493,6 @@ class ImputeModel():
                 x2 = (ccedges[1:] + ccedges[:-1])/2
 
                 has_clustered = (len(clus_clus) > 1)
-                '''
-                bkde = gaussian_kde(clus_back['rdiff'])
-                if has_clustered:
-                    ckde = gaussian_kde(clus_clus['rdiff'])#, h=0.01)
-                    csample_x = np.linspace(-backg,backg,100)
-                    ckde_y = ckde.evaluate(csample_x)
-                else:
-                    print('no "clustered" galaxies!')
-                bsample_x = np.linspace(-1, 1, 100)
-                bkde_y = bkde.evaluate(bsample_x)
-                '''
 
                 # Draw z's ###CHECK THIS####
                 if clusfrac_override is not None:
@@ -518,8 +501,7 @@ class ImputeModel():
                     clus_frac = res.x[0]*res.x[1]*np.sqrt(2*np.pi)/len(selclus)
                 elif fit_type == 'lorentz':
                     clus_frac = res.x[0]*res.x[1]*np.pi/len(selclus)
-                #maxz = max(selectclus['Z'])
-                #for row in fittab:
+
                 mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
                 while np.count_nonzero(mask) > 0:
                     mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
@@ -542,6 +524,12 @@ class ImputeModel():
                 mistab['Z'] = self._inverse_comoving_radial_dist(mistab['R'])
 
                 #Plot
+                if fit_type == 'gauss':
+                    model = self.model
+                elif fit_type == 'lorentz':
+                    model = self.model_lorentz
+                elif fit_type == 'quad':
+                    model = self.model_quad
                 rname = 'R'
                 runit = 'Mpc/h'
                 perpname = '$S_\perp$'
@@ -555,7 +543,7 @@ class ImputeModel():
                 axs[0].set_ylabel('fraction of galaxies in bin')
                 axs[0].set_title('"Background" Pairs')
                 x = np.linspace(np.min(clus_clus['rdiff']), np.max(clus_clus['rdiff']), 50)
-                y = self.model(x, res.x)
+                y = model(x, res.x)
                 axs[1].plot(x,y, 'k-', label='fit')
                 axs[0].hist(cbedges[:-1], cbedges, weights=cbbins, color='b')
                 axs[0].set_xlabel(f'{rname} diff ({runit})')

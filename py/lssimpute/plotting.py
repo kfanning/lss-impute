@@ -153,7 +153,7 @@ class validation_plots():
                     model = ImputeModel.model_quad
                     params = (amp[i], sig[i], slope[i], intercept[i], quad[i])
                 x = np.linspace(np.min(clus), np.max(clus), 50)
-                y = ImputeModel.model(x, params)
+                y = model(x, params)
                 axs[1].plot(x,y, 'k--', label='fit')
             else:
                 y1 /= len(rdiffs)
