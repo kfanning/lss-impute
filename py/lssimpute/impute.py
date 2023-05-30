@@ -69,7 +69,7 @@ class ImputeModel():
         self.sperp_clusbins, clusedges = np.histogram(selectclus['sperp_n0'], range=(0,maxbin), bins=nbins)
         if nbins==18:
             # merge bins 6,7 and 8-14
-            mergebin = 6
+            mergebin = 11
             maskb = np.ones(len(self.sperp_misbins))
             #maskb[7] = 0
             maskb[mergebin:-1] = 0
@@ -493,9 +493,9 @@ class ImputeModel():
                 ress = []
                 for f in ft:
                     res, end_err = self._fit(clus_clus['rdiff'], fit_type=f)
-                    errs.append(end_err)
+                    errs.append(end_err/self.dof(f))
                     ress.append(res)
-                    print(f'Fit: {f}, end error: {end_err:3f}')
+                    print(f'Fit: {f}, end error/dof: {end_err/self.dof(f):3f}')
                     print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
                 choice_idx = np.argmin(errs)
                 fit_choice = ft[choice_idx]
@@ -632,6 +632,14 @@ class ImputeModel():
         elif fit_type == 'quad':
             objective = self.error_quad
         return objective(x, params)
+
+    def dof(self, fit_type='gauss'):
+        if fit_type == 'gauss':
+            return 4
+        elif fit_type == 'lorentz':
+            return 4
+        elif fit_type == 'quad':
+            return 5
 
     @staticmethod
     def model(x, params):
