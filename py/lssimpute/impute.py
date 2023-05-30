@@ -83,6 +83,11 @@ class ImputeModel():
             self.sperp_misbins = np.extract(maskb, self.sperp_misbins)
             self.sperp_edges = np.extract(maske, self.sperp_edges)
             self.sperp_clusbins = np.extract(maskb, self.sperp_clusbins)
+        else:
+            bins = np.linspace(0, 2. + 2./(nbins-1), nbins+1)
+            bins[-1] = maxbin
+            self.sperp_misbins, self.sperp_edges = np.histogram(self.misscat['sperp_n0'], bins=bins)
+            self.sperp_clusbins, clusedges = np.histogram(selectclus['sperp_n0'], bins=bins)
         self.did_sperpbin = True
         return
 
@@ -493,14 +498,14 @@ class ImputeModel():
                 ress = []
                 for f in ft:
                     res, end_err = self._fit(clus_clus['rdiff'], fit_type=f)
-                    errs.append(end_err/self.dof(f))
+                    errs.append(end_err*self.dof(f))
                     ress.append(res)
-                    print(f'Fit: {f}, end error/dof: {end_err/self.dof(f):3f}')
+                    print(f'Fit: {f}, end error/dof: {end_err:3f}')
                     print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
                 choice_idx = np.argmin(errs)
                 fit_choice = ft[choice_idx]
                 res = ress[choice_idx]
-                error_fit.append(errs[choice_idx])
+                error_fit.append(errs[choice_idx]/self.dof(fit_choice))
                 y1 = cbbins/(len(clus_back)*(cbedges[1]-cbedges[0]))
                 x1 = ((cbedges[1:] + cbedges[:-1])/2)#np.concatenate()(cbedges2[1:] + cbedges2[:-1])/2))
                 y2 = ccbins/(len(clus_clus)*(ccedges[1]-ccedges[0]))
