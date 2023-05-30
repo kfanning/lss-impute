@@ -436,7 +436,7 @@ class ImputeModel():
 
     def impute_physical_fit(self, clusfrac_override=None, skip_background=True, fit_type='gauss'):
         fit_type = fit_type.lower()
-        assert fit_type in ['gauss', 'lorentz', 'quad'], f'Invalid fit_type {fit_type}'
+        assert fit_type in ['gauss', 'lorentz', 'quad', 'dynamic'], f'Invalid fit_type {fit_type}'
 
         #impute model
         mistab = self.misscat.copy()
@@ -444,7 +444,7 @@ class ImputeModel():
         mistab['R'] = np.zeros(len(mistab), dtype=np.float64) - 1
         mistab['Z'] = np.zeros(len(mistab), dtype=np.float64) - 1
         # data storage
-        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'CALC_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK', 'FIT_AMPLITUDE', 'FIT_WIDTH', 'FIT_SLOPE', 'FIT_INTERCEPT', 'FIT_QUAD']
+        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'CALC_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK', 'FIT_AMPLITUDE', 'FIT_WIDTH', 'FIT_SLOPE', 'FIT_INTERCEPT', 'FIT_QUAD', 'FIT_TYPE','ERROR']
         binnum = []
         minrs = []
         maxrs = []
@@ -461,6 +461,8 @@ class ImputeModel():
         slope = []
         intercept = []
         quad = []
+        fitt = []
+        error_fit = []
         self.figs = []
 
         for j in range(len(self.sperp_edges)-1): #misedges is nn_angdist
@@ -472,7 +474,6 @@ class ImputeModel():
                 # changed n1 to n0 since the nn extractor should shift for self matches now, be careful
                 selclus = self.cluscat[(self.cluscat['r_n0'] > minr) & (self.cluscat['r_n0'] < maxr) & (self.cluscat['sperp_n0'] > minsperp) & (self.cluscat['sperp_n0'] < maxsperp)]# & (selectclus['Z'] > 0.4) & (selectclus['Z'] < 1.1)] #n1 is just cause the file has self as "n0" rather than a different object
                 selclus['rdiff'] = (selclus['R']-selclus['r_n0'])
-
                 #Seperate cluster/background cutoff is just +/- 0.01 for now (by inspection :))
                 #backg = 0.01
                 # 0.01 zdiff at low Z is ~ 22.5Mpc/h, ~12.5Mpc/h at high z where it maybe doesn't work well
@@ -484,9 +485,19 @@ class ImputeModel():
                 cbbins, cbedges = np.histogram(clus_back['rdiff'], bins=50)#, range=(-0.01,0.01))
                 ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=50)#, range=(-0.01,0.01))
 
-                res = self._fit(clus_clus['rdiff'], fit_type=fit_type)
-                print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
-
+                if fit_type=='dynamic':
+                    ft = ['gauss','lorentz']
+                else:
+                    ft = [fit_type]
+                errs = []
+                for f in ft:
+                    res = self._fit(clus_clus['rdiff'], fit_type=f)
+                    errs.append(self.fit_error(res.x, clus_clus['rdiff'], fit_type=f))
+                    print(f'Fit: {f}, end error: {errs[-1]}')
+                    print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
+                choice_idx = np.argmin(errs)
+                fit_type = ft[choice_idx]
+                error_fit.append(errs[choice_idx])
                 y1 = cbbins/(len(clus_back)*(cbedges[1]-cbedges[0]))
                 x1 = ((cbedges[1:] + cbedges[:-1])/2)#np.concatenate()(cbedges2[1:] + cbedges2[:-1])/2))
                 y2 = ccbins/(len(clus_clus)*(ccedges[1]-ccedges[0]))
@@ -573,7 +584,8 @@ class ImputeModel():
                     quad.append(res.x[4])
                 else:
                     quad.append(0)
-        self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, fitfrac, n_obsclus, n_obsback, n_misclus, n_misback, amp, sig, slope, intercept, quad], names=names)
+                fitt.append(fit_type)
+        self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, fitfrac, n_obsclus, n_obsback, n_misclus, n_misback, amp, sig, slope, intercept, quad, fitt, error_fit], names=names)
         #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
@@ -598,6 +610,24 @@ class ImputeModel():
         res = scipy.optimize.minimize(objective, params_g, args=[y_data, x], bounds=bounds, tol=tol)
         print(f'{self.error(params_g, [y_data, x]):.3f} -> {self.error(res.x, [y_data, x]):.3f}')
         return res
+
+    def fit_model(self, x, params, fit_type='gauss'):
+        if fit_type == 'gauss':
+            objective = self.model
+        elif fit_type == 'lorentz':
+            objective = self.model_lorentz
+        elif fit_type == 'quad':
+            objective = self.model_quad
+        return objective(x, params)
+
+    def fit_error(self, x, params, fit_type='gauss'):
+        if fit_type == 'gauss':
+            objective = self.error
+        elif fit_type == 'lorentz':
+            objective = self.error_lorentz
+        elif fit_type == 'quad':
+            objective = self.error_quad
+        return objective(x, params)
 
     @staticmethod
     def model(x, params):
@@ -624,6 +654,8 @@ class ImputeModel():
     def error_quad(self, params, args):
         return np.sum((args[0] - self.model_quad(args[1], params))**2)
 
+    def annulus_correction(self, z, z_ref=0.8):
+        return
 
 
     def _inverse_comoving_radial_dist(self, r):
