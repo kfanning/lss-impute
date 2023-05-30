@@ -490,13 +490,16 @@ class ImputeModel():
                 else:
                     ft = [fit_type]
                 errs = []
+                ress = []
                 for f in ft:
                     res, end_err = self._fit(clus_clus['rdiff'], fit_type=f)
                     errs.append(end_err)
+                    ress.append(res)
                     print(f'Fit: {f}, end error: {end_err:3f}')
                     print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
                 choice_idx = np.argmin(errs)
                 fit_choice = ft[choice_idx]
+                res = ress[choice_idx]
                 error_fit.append(errs[choice_idx])
                 y1 = cbbins/(len(clus_back)*(cbedges[1]-cbedges[0]))
                 x1 = ((cbedges[1:] + cbedges[:-1])/2)#np.concatenate()(cbedges2[1:] + cbedges2[:-1])/2))
