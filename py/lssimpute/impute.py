@@ -72,7 +72,7 @@ class ImputeModel():
             mergebin = 6
             maskb = np.ones(len(self.sperp_misbins))
             #maskb[7] = 0
-            maskb[mergebin:-1] = self.sperp_edges
+            maskb[mergebin:-1] = 0
             maske = np.ones(len(self.sperp_edges))
             #maske[7] = 0
             maske[mergebin+1:-1] = 0
