@@ -491,7 +491,7 @@ class ImputeModel():
                     ft = [fit_type]
                 errs = []
                 for f in ft:
-                    res end_err = self._fit(clus_clus['rdiff'], fit_type=f)
+                    res, end_err = self._fit(clus_clus['rdiff'], fit_type=f)
                     errs.append(end_err)
                     print(f'Fit: {f}, end error: {end_err:3f}')
                     print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
