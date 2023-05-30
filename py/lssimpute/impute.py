@@ -491,12 +491,12 @@ class ImputeModel():
                     ft = [fit_type]
                 errs = []
                 for f in ft:
-                    res = self._fit(clus_clus['rdiff'], fit_type=f)
-                    errs.append(self.fit_error(res.x, clus_clus['rdiff'], fit_type=f))
-                    print(f'Fit: {f}, end error: {errs[-1]}')
+                    res end_err = self._fit(clus_clus['rdiff'], fit_type=f)
+                    errs.append(end_err)
+                    print(f'Fit: {f}, end error: {end_err:3f}')
                     print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
                 choice_idx = np.argmin(errs)
-                fit_type = ft[choice_idx]
+                fit_choice = ft[choice_idx]
                 error_fit.append(errs[choice_idx])
                 y1 = cbbins/(len(clus_back)*(cbedges[1]-cbedges[0]))
                 x1 = ((cbedges[1:] + cbedges[:-1])/2)#np.concatenate()(cbedges2[1:] + cbedges2[:-1])/2))
@@ -508,9 +508,9 @@ class ImputeModel():
                 # Draw z's ###CHECK THIS####
                 if clusfrac_override is not None:
                     clus_frac = clusfrac_override
-                elif fit_type in ['gauss','quad']:  
+                elif fit_choice in ['gauss','quad']:  
                     clus_frac = res.x[0]*res.x[1]*np.sqrt(2*np.pi)/len(selclus)
-                elif fit_type == 'lorentz':
+                elif fit_choice == 'lorentz':
                     clus_frac = res.x[0]*res.x[1]*np.pi/len(selclus)
 
                 mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
@@ -535,11 +535,11 @@ class ImputeModel():
                 mistab['Z'] = self._inverse_comoving_radial_dist(mistab['R'])
 
                 #Plot
-                if fit_type == 'gauss':
+                if fit_choice == 'gauss':
                     model = self.model
-                elif fit_type == 'lorentz':
+                elif fit_choice == 'lorentz':
                     model = self.model_lorentz
-                elif fit_type == 'quad':
+                elif fit_choice == 'quad':
                     model = self.model_quad
                 rname = 'R'
                 runit = 'Mpc/h'
@@ -580,11 +580,11 @@ class ImputeModel():
                 sig.append(res.x[1])
                 slope.append(res.x[2])
                 intercept.append(res.x[3])
-                if fit_type == 'quad':
+                if fit_choice == 'quad':
                     quad.append(res.x[4])
                 else:
                     quad.append(0)
-                fitt.append(fit_type)
+                fitt.append(fit_choice)
         self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, fitfrac, n_obsclus, n_obsback, n_misclus, n_misback, amp, sig, slope, intercept, quad, fitt, error_fit], names=names)
         #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
@@ -608,8 +608,9 @@ class ImputeModel():
         tol = 0.0000001
         print(params_g)
         res = scipy.optimize.minimize(objective, params_g, args=[y_data, x], bounds=bounds, tol=tol)
-        print(f'{self.error(params_g, [y_data, x]):.3f} -> {self.error(res.x, [y_data, x]):.3f}')
-        return res
+        end_err = objective(res.x, [y_data, x])
+        print(f'{objective(params_g, [y_data, x]):.3f} -> {end_err:.3f}')
+        return res, end_err
 
     def fit_model(self, x, params, fit_type='gauss'):
         if fit_type == 'gauss':
