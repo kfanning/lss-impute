@@ -11,7 +11,7 @@ parser.add_argument('--survey', '-s', default='y1mock', help='Survey to use (typ
 parser.add_argument('--version', '-v', default=0, help='catalog version, for mocks this is mock number')
 parser.add_argument('--impversion', '-i', default=None, help='override version for imputation, default None == same as version')
 parser.add_argument('--physical', '-p', action='store_true', help='Set flag to use physical units (S_perp, R) instead of Z and angular distance.')
-parser.add_argument('--fit_type', '-ft', default='gauss', type=str, help='Type of fit to use (gauss, quad or lorentz)')
+#parser.add_argument('--fit_type', '-ft', default='gauss', type=str, help='Type of fit to use (gauss, quad or lorentz)')
 
 uargs = parser.parse_args()
 catdir = dirs.get_catdir(uargs.survey, uargs.version)
@@ -46,7 +46,7 @@ fig = plotter.fraction_bin()
 fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_clusfrac.pdf')
 plt.close(fig)
 mode = 'physical' if uargs.physical else None
-figs = plotter.imputation_fits(mode=mode, fit_type=uargs.fit_type)
+figs = plotter.imputation_fits(mode=mode)
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_model_bins.pdf'
 with PdfPages(filename) as pdf:
     for fig in figs:
@@ -64,7 +64,7 @@ fig = plotter.fraction_bin()
 fig.savefig(f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_clusfrac.pdf')
 plt.close(fig)
 mode = 'physical' if uargs.physical else None
-figs = plotter.imputation_fits(mode=mode, fit_type=uargs.fit_type)
+figs = plotter.imputation_fits(mode=mode)
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_model_bins.pdf'
 with PdfPages(filename) as pdf:
     for fig in figs:
