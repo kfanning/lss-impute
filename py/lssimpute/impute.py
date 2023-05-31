@@ -491,7 +491,7 @@ class ImputeModel():
                 ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=50)#, range=(-0.01,0.01))
 
                 if fit_type=='dynamic':
-                    ft = ['gauss','lorentz','quad']
+                    ft = ['gauss','lorentz']#,'quad']
                 else:
                     ft = [fit_type]
                 errs = []
