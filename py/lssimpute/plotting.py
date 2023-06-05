@@ -148,8 +148,15 @@ class validation_plots():
                 model = ImputeModel.model
             elif fitt[i] == 'lorentz':
                 model = ImputeModel.model_lorentz
+            if fitt[i] == 'quad':
+                model = ImputeModel.model_quad
+            elif fitt[i] == 'quad_l':
+                model = ImputeModel.model_quad_lorentz
             if self.fit:
-                params = (amp[i], sig[i], slope[i], intercept[i])
+                if 'quad' in self.fitt[i]:
+                    params = (amp[i], sig[i], slope[i], intercept[i], quad[i])
+                else:
+                    params = (amp[i], sig[i], slope[i], intercept[i])
                 x = np.linspace(np.min(clus), np.max(clus), 50)
                 y = model(x, params)
                 axs[1].plot(x,y, 'k--', label='fit')

@@ -491,7 +491,7 @@ class ImputeModel():
                 ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=50)#, range=(-0.01,0.01))
 
                 if fit_type=='dynamic':
-                    ft = ['gauss','lorentz']#,'quad']
+                    ft = ['gauss','lorentz','quad', 'quad_l']
                 else:
                     ft = [fit_type]
                 errs = []
@@ -518,7 +518,7 @@ class ImputeModel():
                     clus_frac = clusfrac_override
                 elif fit_choice in ['gauss','quad']:  
                     clus_frac = res.x[0]*res.x[1]*np.sqrt(2*np.pi)/len(selclus)
-                elif fit_choice == 'lorentz':
+                elif fit_choice in ['lorentz', 'quad_l']:
                     clus_frac = res.x[0]*res.x[1]*np.pi/len(selclus)
 
                 mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
@@ -549,6 +549,8 @@ class ImputeModel():
                     model = self.model_lorentz
                 elif fit_choice == 'quad':
                     model = self.model_quad
+                elif fit_choice == 'quad_l':
+                    model = self.model_quad_lorentz
                 rname = 'R'
                 runit = 'Mpc/h'
                 perpname = '$S_\perp$'
@@ -611,6 +613,10 @@ class ImputeModel():
             objective = self.error_quad
             bounds.append((None, None))
             params_g = (np.max(counts), np.std(data), 0, 0, 0)
+        elif fit_type == 'quad_l':
+            objective = self.error_quad_lorentz
+            bounds.append((None, None))
+            params_g = (np.max(counts), np.std(data), 0, 0, 0)
         x = (bins[1:] + bins[:-1])/2
         y_data = counts#/width
         tol = 0.0000001
@@ -636,6 +642,8 @@ class ImputeModel():
             objective = self.error_lorentz
         elif fit_type == 'quad':
             objective = self.error_quad
+        elif fit_type == 'quad_l':
+            objective = self.error_quad_lorentz
         return objective(x, params)
 
     def dof(self, fit_type='gauss'):
@@ -644,6 +652,8 @@ class ImputeModel():
         elif fit_type == 'lorentz':
             return 4
         elif fit_type == 'quad':
+            return 5
+        elif fit_type == 'quad_l':
             return 5
 
     @staticmethod
@@ -657,6 +667,10 @@ class ImputeModel():
     @staticmethod
     def model_quad(x, params):
         return params[0]*np.exp(-x**2/(2*params[1]**2)) + params[2]*x + params[3] + params[4]*x**2
+
+    @staticmethod
+    def model_quad_lorentz(x, params):
+        return params[0]*(params[1]**2/(x**2 + params[1]**2)) + params[2]*x + params[3] + params[4]*x**2
     
     @staticmethod
     def gauss(x, params):
@@ -670,6 +684,9 @@ class ImputeModel():
 
     def error_quad(self, params, args):
         return np.sum((args[0] - self.model_quad(args[1], params))**2)
+
+    def error_quad_lorentz(self, params, args):
+        return np.sum((args[0] - self.model_quad_lorentz(args[1], params))**2)
 
     def annulus_correction(self, z, z_ref=0.8):
         return
