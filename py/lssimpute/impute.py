@@ -498,7 +498,7 @@ class ImputeModel():
                 ress = []
                 for f in ft:
                     res, end_err = self._fit(clus_clus['rdiff'], fit_type=f)
-                    errs.append(end_err*self.dof(f))
+                    errs.append(end_err)
                     ress.append(res)
                     print(f'Fit: {f}, end error/dof: {end_err:3f}')
                     print(f'{i+(j*(len(self.r_edges)-1))} optimize status: {res.success}, {res.x}, {res.message}')
@@ -622,9 +622,10 @@ class ImputeModel():
         tol = 0.0000001
         print(params_g)
         res = scipy.optimize.minimize(objective, params_g, args=[y_data, x], bounds=bounds, tol=tol)
-        end_err = objective(res.x, [y_data, x])
-        print(f'{objective(params_g, [y_data, x]):.3f} -> {end_err:.3f}')
-        return res, end_err
+        chi2_start = self.chi2_dof(x, y_data, params_g, fit_type=fit_type)
+        chi2_end = self.chi2_dof(x, y_data, res.x, fit_type=fit_type)
+        print(f'{chi2_start:.3f} -> {chi2_end:.3f}')
+        return res, chi2_end
 
     def fit_model(self, x, params, fit_type='gauss'):
         if fit_type == 'gauss':
@@ -644,7 +645,7 @@ class ImputeModel():
             objective = self.error_quad
         elif fit_type == 'quad_l':
             objective = self.error_quad_lorentz
-        return objective(x, params)
+        return objective(params, x)
 
     def dof(self, fit_type='gauss'):
         if fit_type == 'gauss':
@@ -690,6 +691,10 @@ class ImputeModel():
 
     def annulus_correction(self, z, z_ref=0.8):
         return
+
+    def chi2_dof(self, x, y, params, fit_type):
+        dof = len(x) - self.dof(fit_type=fit_type)
+        return self.fit_error([x,y],params,fit_type=fit_type)/dof
 
 
     def _inverse_comoving_radial_dist(self, r):
