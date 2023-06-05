@@ -678,16 +678,16 @@ class ImputeModel():
         return params[0]*np.exp(-x**2/(2*params[1]**2))
     
     def error(self, params, args):
-        return np.sum((args[0] - self.model(args[1], params))**2)
+        return np.sum(((args[0] - self.model(args[1], params))**2)/args[0])
 
     def error_lorentz(self, params, args):
-        return np.sum((args[0] - self.model_lorentz(args[1], params))**2)
+        return np.sum(((args[0] - self.model_lorentz(args[1], params))**2)/args[0])
 
     def error_quad(self, params, args):
-        return np.sum((args[0] - self.model_quad(args[1], params))**2)
+        return np.sum(((args[0] - self.model_quad(args[1], params))**2)/args[0])
 
     def error_quad_lorentz(self, params, args):
-        return np.sum((args[0] - self.model_quad_lorentz(args[1], params))**2)
+        return np.sum(((args[0] - self.model_quad_lorentz(args[1], params))**2)/args[0])
 
     def annulus_correction(self, z, z_ref=0.8):
         return
