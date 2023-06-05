@@ -694,7 +694,7 @@ class ImputeModel():
 
     def chi2_dof(self, x, y, params, fit_type):
         dof = len(x) - self.dof(fit_type=fit_type)
-        return self.fit_error([x,y],params,fit_type=fit_type)/dof
+        return self.fit_error([y,x],params,fit_type=fit_type)/dof
 
 
     def _inverse_comoving_radial_dist(self, r):
