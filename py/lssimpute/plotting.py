@@ -153,7 +153,7 @@ class validation_plots():
             elif fitt[i] == 'quad_l':
                 model = ImputeModel.model_quad_lorentz
             if self.fit:
-                if 'quad' in self.fitt[i]:
+                if 'quad' in fitt[i]:
                     params = (amp[i], sig[i], slope[i], intercept[i], quad[i])
                 else:
                     params = (amp[i], sig[i], slope[i], intercept[i])
