@@ -93,6 +93,57 @@ class validation_plots():
         else:
             return
 
+    def width_bin(self):
+        if self.imputedetails is not None:
+            fig, ax = plt.subplots()
+            fig.dpi = self.dpi
+            sperpbins = np.array(self.imputedetails['MAX_SPERPDIST'])
+            lims = np.nonzero(sperpbins[1:] - sperpbins[:-1])[0] + 1
+            next_lo_idx = 0
+            for lim in lims:
+                ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_WIDTH'][next_lo_idx:lim], '.--')
+                next_lo_idx = lim
+            ax.set_xlabel('Bin Number')
+            ax.set_ylabel('Width of fit')
+            ax.set_title(f'{self.survey} {self.tracer} {self.region}')
+            return fig
+        else:
+            return
+
+    def slope_bin(self):
+        if self.imputedetails is not None:
+            fig, ax = plt.subplots()
+            fig.dpi = self.dpi
+            sperpbins = np.array(self.imputedetails['MAX_SPERPDIST'])
+            lims = np.nonzero(sperpbins[1:] - sperpbins[:-1])[0] + 1
+            next_lo_idx = 0
+            for lim in lims:
+                ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_SLOPE'][next_lo_idx:lim], '.--')
+                next_lo_idx = lim
+            ax.set_xlabel('Bin Number')
+            ax.set_ylabel('Slope of fit')
+            ax.set_title(f'{self.survey} {self.tracer} {self.region}')
+            return fig
+        else:
+            return
+
+    def intercept_bin(self):
+        if self.imputedetails is not None:
+            fig, ax = plt.subplots()
+            fig.dpi = self.dpi
+            sperpbins = np.array(self.imputedetails['MAX_SPERPDIST'])
+            lims = np.nonzero(sperpbins[1:] - sperpbins[:-1])[0] + 1
+            next_lo_idx = 0
+            for lim in lims:
+                ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_INTERCEPT'][next_lo_idx:lim], '.--')
+                next_lo_idx = lim
+            ax.set_xlabel('Bin Number')
+            ax.set_ylabel('Intercept of fit')
+            ax.set_title(f'{self.survey} {self.tracer} {self.region}')
+            return fig
+        else:
+            return
+
     def imputation_bins(self):
         return
 
