@@ -10,7 +10,7 @@ parser.add_argument('--survey', '-s', default='y1mock', help='Survey to use (typ
 parser.add_argument('--version', '-v', default=0, help='catalog version, for mocks this is mock number')
 parser.add_argument('--impversion', '-i', default=None, help='override version for imputation, default None == same as version')
 parser.add_argument('--overwrite', '-o', action='store_true', help='Set flag to allow overwriting of existing files')
-parser.add_argument('--stiched', action='store_true', help='Set flag to store randoms in stitched directory like stitch_impute.py')
+parser.add_argument('--stitched', action='store_true', help='Set flag to store randoms in stitched directory like stitch_impute.py')
 
 # add dir management
 # catdir (for base catalogs for reading, no writing)
@@ -25,10 +25,10 @@ if uargs.impversion is not None:
 else:
     impver = uargs.version
 impute_dir = dirs.get_catdir('y1model', impver)
-if uargs.stiched:
+if uargs.stitched:
     stitch_dir = dirs.get_catdir('y1impute', impver)
 else:
-    stiched_dir = impute_dir
+    stitch_dir = impute_dir
 
 #read catalogs (using impute and full to calc downsample amount)
 impn = Table.read(os.path.join(impute_dir, f'{uargs.tracer}_N_clustering.dat.fits'))
