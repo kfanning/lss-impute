@@ -33,6 +33,7 @@ class ImputeModel():
         self.backg_Z = 0.01
         tracer_bounds = {'LRG': [0.4,1.1], 'ELG':[0.8, 1.6]}
         self.tracer_bounds = tracer_bounds[tracer]
+        self.tracer=tracer
         return
 
     def bin_angular(self, nbins=18):
@@ -180,7 +181,7 @@ class ImputeModel():
         else:
             r_bounds = self.cosmo.comoving_radial_distance(self.tracer_bounds)
             bdiff = r_bounds[1] - r_bounds[0]
-            bins = np.linspace(r_bounds[0] + bdiff/(nbins-2), r_bounds[1] + bdiff/(nbins-2), nbins+1)
+            bins = np.linspace(r_bounds[0], r_bounds[1], nbins+1)
             bins[-1] = maxbin
             bins[0] = minbin
             self.r_misbins, self.r_edges = np.histogram(self.misscat['r_n0'], bins=bins)
