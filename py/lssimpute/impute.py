@@ -183,8 +183,8 @@ class ImputeModel():
             bins = np.linspace(r_bounds[0] + bdiff/(nbins-2), r_bounds[1] + bdiff/(nbins-2), nbins+1)
             bins[-1] = maxbin
             bins[0] = minbin
-            self.r_misbins, self.r_edges = np.histogram(self.misscat['sperp_n0'], bins=bins)
-            self.r_clusbins, clusedges = np.histogram(selectclus['sperp_n0'], bins=bins)
+            self.r_misbins, self.r_edges = np.histogram(self.misscat['r_n0'], bins=bins)
+            self.r_clusbins, clusedges = np.histogram(selectclus2['r_n0'], bins=bins)
         self.did_rbin = True
         return
 
