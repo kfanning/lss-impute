@@ -497,7 +497,7 @@ class ImputeModel():
                 nbins = 50
                 if extended:
                     backg = 2*backg
-                    nbins = 2*nbins
+                    #nbins = 2*nbins
                 clusmask = (selclus['rdiff'] < backg) & (selclus['rdiff'] > -1*backg)
                 clus_clus = selclus[clusmask]
                 clus_back = selclus[~clusmask]
