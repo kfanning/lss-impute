@@ -35,7 +35,7 @@ impute_dir = dirs.get_catdir('y1model', impver)
 #read catalogs (using complete and full catalogs then splitting later)
 clusn = Table.read(os.path.join(catdir, f'{uargs.tracer}_complete_N_clustering.dat.fits'))
 cluss = Table.read(os.path.join(catdir, f'{uargs.tracer}_complete_S_clustering.dat.fits'))
-full =  Table.read(os.path.join(catdir, f'{uargs.tracer}_full.dat.fits'))
+full =  Table.read(os.path.join(catdir, f'{uargs.tracer}_full.dat.fits')) 
 
 #get missed and observed for each region
 obsn, missn = cat.split_obs_missed(full, clusn, region='N')
@@ -72,7 +72,7 @@ obs_nncat_s.write(os.path.join(stagedir, f'{uargs.tracer}_S_clustering.dat.fits'
 #obs_nncat = vstack([obs_nncat_n, obs_nncat_s])
 
 #run imputation
-impn = impute.ImputeModel(obs_nncat_n, mis_nncat_n)
+impn = impute.ImputeModel(obs_nncat_n, mis_nncat_n, tracer=uargs.tracer)
 impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type)
 figs = impn.figs
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_model_bins_live.pdf'
@@ -80,7 +80,7 @@ with PdfPages(filename) as pdf:
     for fig in figs:
         pdf.savefig(fig)
         plt.close(fig)
-imps = impute.ImputeModel(obs_nncat_s, mis_nncat_s)
+imps = impute.ImputeModel(obs_nncat_s, mis_nncat_s, tracer=uargs.tracer)
 imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type)
 figs = imps.figs
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_model_bins_live.pdf'

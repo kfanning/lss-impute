@@ -16,7 +16,7 @@ def make_nn_imp():
 
 class ImputeModel():
 
-    def __init__(self, cluscat, misscat, region=None, version=None):
+    def __init__(self, cluscat, misscat, region=None, version=None, tracer='LRG'):
         self.cluscat = cluscat
         self.misscat = misscat
         self.cosmo = TabulatedDESI()
@@ -31,6 +31,8 @@ class ImputeModel():
         self.did_rbin = False
         self.backg_R = 22.5 #Mpc/h
         self.backg_Z = 0.01
+        tracer_bounds = {'LRG': [0.4,1.1], 'ELG':[0.8, 1.6]}
+        self.tracer_bounds = tracer_bounds[tracer]
         return
 
     def bin_angular(self, nbins=18):
@@ -175,6 +177,14 @@ class ImputeModel():
             self.r_misbins = np.extract(mask, self.r_misbins)
             self.r_clusbins = np.extract(mask, self.r_clusbins)
             self.r_edges = np.extract(mask2, self.r_edges)
+        else:
+            r_bounds = self.cosmo.comoving_radial_distance(self.tracer_bounds)
+            bdiff = r_bounds[1] - r_bounds[0]
+            bins = np.linspace(r_bounds[0] + bdiff/(nbins-2), r_bounds[1] + bdiff/(nbins-2), nbins+1)
+            bins[-1] = maxbin
+            bins[0] = minbin
+            self.r_misbins, self.r_edges = np.histogram(self.misscat['sperp_n0'], bins=bins)
+            self.r_clusbins, clusedges = np.histogram(selectclus['sperp_n0'], bins=bins)
         self.did_rbin = True
         return
 
@@ -439,7 +449,7 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
-    def impute_physical_fit(self, clusfrac_override=None, skip_background=True, fit_type='gauss'):
+    def impute_physical_fit(self, clusfrac_override=None, skip_background=True, fit_type='gauss', extended=False):
         fit_type = fit_type.lower()
         assert fit_type in ['gauss', 'lorentz', 'quad', 'dynamic'], f'Invalid fit_type {fit_type}'
 
@@ -483,12 +493,16 @@ class ImputeModel():
                 #backg = 0.01
                 # 0.01 zdiff at low Z is ~ 22.5Mpc/h, ~12.5Mpc/h at high z where it maybe doesn't work well
                 backg = self.backg_R#22.5 #Mpc/h
+                nbins = 50
+                if extended:
+                    backg = 2*backg
+                    nbins = 2*nbins
                 clusmask = (selclus['rdiff'] < backg) & (selclus['rdiff'] > -1*backg)
                 clus_clus = selclus[clusmask]
                 clus_back = selclus[~clusmask]
 
-                cbbins, cbedges = np.histogram(clus_back['rdiff'], bins=50)#, range=(-0.01,0.01))
-                ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=50)#, range=(-0.01,0.01))
+                cbbins, cbedges = np.histogram(clus_back['rdiff'], bins=nbins)#, range=(-0.01,0.01))
+                ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=nbins)#, range=(-0.01,0.01))
 
                 if fit_type=='dynamic':
                     ft = ['gauss','lorentz','quad', 'quad_l']
