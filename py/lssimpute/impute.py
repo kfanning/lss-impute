@@ -618,7 +618,7 @@ class ImputeModel():
     def _fit(self, data, fit_type='gauss', nbins=50):
         #width = bins[1] - bins[0]
         counts, bins = np.histogram(data, bins=nbins, density=False)
-        params_g = (np.max(counts), np.std(data), 0, 0)
+        params_g = (np.max(counts), 5, 0, 0)
         bounds = [(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])]
         if fit_type == 'gauss':
             objective = self.error
