@@ -1,5 +1,5 @@
 import sys
-from astropy.table import Table
+from astropy.table import Table, vstack
 import numpy as np
 import matplotlib.pyplot as plt
 from LSS.tabulated_cosmo import TabulatedDESI
@@ -16,8 +16,14 @@ def make_nn_imp():
 
 class ImputeModel():
 
-    def __init__(self, cluscat, misscat, region=None, version=None, tracer='LRG'):
-        self.cluscat = cluscat
+    def __init__(self, cluscat, misscat, cluscat2=None, region=None, version=None, tracer='LRG'):
+        if cluscat2 is not None:
+            stacked = vstack([cluscat, cluscat2])
+            self.cluscat = stacked
+            self.same_reg_clus = cluscat
+        else:
+            self.cluscat = cluscat
+            self.same_reg_clus = cluscat
         self.misscat = misscat
         self.cosmo = TabulatedDESI()
         self.misscat['r_n0'] = self.cosmo.comoving_radial_distance(self.misscat['z_n0'])
@@ -460,7 +466,7 @@ class ImputeModel():
         mistab['R'] = np.zeros(len(mistab), dtype=np.float64) - 1
         mistab['Z'] = np.zeros(len(mistab), dtype=np.float64) - 1
         # data storage
-        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'CALC_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK', 'FIT_AMPLITUDE', 'FIT_WIDTH', 'FIT_SLOPE', 'FIT_INTERCEPT', 'FIT_QUAD', 'FIT_TYPE','ERROR']
+        names = ['BIN_NUM', 'MIN_R', 'MAX_R', 'MIN_SPERPDIST', 'MAX_SPERPDIST', 'CLUSTERED_FRAC', 'CALC_FRAC', 'N_OBS_CLUS', 'N_OBS_BACK', 'N_MIS_CLUS', 'N_MIS_BACK', 'FIT_AMPLITUDE', 'FIT_WIDTH', 'FIT_SLOPE', 'FIT_INTERCEPT', 'FIT_QUAD', 'FIT_TYPE','ERROR','REGION_FRAC']
         binnum = []
         minrs = []
         maxrs = []
@@ -479,6 +485,7 @@ class ImputeModel():
         quad = []
         fitt = []
         error_fit = []
+        reg_frac = []
         self.figs = []
 
         for j in range(len(self.sperp_edges)-1): #misedges is nn_angdist
@@ -490,6 +497,9 @@ class ImputeModel():
                 # changed n1 to n0 since the nn extractor should shift for self matches now, be careful
                 selclus = self.cluscat[(self.cluscat['r_n0'] > minr) & (self.cluscat['r_n0'] < maxr) & (self.cluscat['sperp_n0'] > minsperp) & (self.cluscat['sperp_n0'] < maxsperp)]# & (selectclus['Z'] > 0.4) & (selectclus['Z'] < 1.1)] #n1 is just cause the file has self as "n0" rather than a different object
                 selclus['rdiff'] = (selclus['R']-selclus['r_n0'])
+
+                selreg = self.same_reg_clus[(self.same_reg_clus['r_n0'] > minr) & (self.same_reg_clus['r_n0'] < maxr) & (self.same_reg_clus['sperp_n0'] > minsperp) & (self.cluscat['sperp_n0'] < maxsperp)]# & (selectclus['Z'] > 0.4) & (selectclus['Z'] < 1.1)] #n1 is just cause the file has self as "n0" rather than a different object
+                selreg['rdiff'] = (selreg['R']-selreg['r_n0'])
                 #Seperate cluster/background cutoff is just +/- 0.01 for now (by inspection :))
                 #backg = 0.01
                 # 0.01 zdiff at low Z is ~ 22.5Mpc/h, ~12.5Mpc/h at high z where it maybe doesn't work well
@@ -501,6 +511,10 @@ class ImputeModel():
                 clusmask = (selclus['rdiff'] < backg) & (selclus['rdiff'] > -1*backg)
                 clus_clus = selclus[clusmask]
                 clus_back = selclus[~clusmask]
+
+                regmask = (selreg['rdiff'] < backg) & (selreg['rdiff'] > -1*backg)
+                reg_clus = selreg[regmask]
+                reg_frac.append(len(reg_clus)/len(clus_clus)) #for plotting split catalogs again scale fit curve by this
 
                 cbbins, cbedges = np.histogram(clus_back['rdiff'], bins=nbins)#, range=(-0.01,0.01))
                 ccbins, ccedges = np.histogram(clus_clus['rdiff'], bins=nbins)#, range=(-0.01,0.01))

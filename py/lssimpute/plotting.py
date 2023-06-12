@@ -130,6 +130,7 @@ class validation_plots():
             intercept = list(self.imputedetails['FIT_INTERCEPT'])
             quad = list(self.imputedetails['FIT_QUAD'])
             fitt = list(self.imputedetails['FIT_TYPE'])
+            scale = list(self.imputedetails['REGION_FRAC'])
         figs = []
         #for j in range(len(pmins)):
         for i in range(len(rmins)):
@@ -163,7 +164,7 @@ class validation_plots():
                     params = (amp[i], sig[i], slope[i], intercept[i])
                 x = np.linspace(np.min(clus), np.max(clus), 200)
                 y = model(x, params)
-                axs[1].plot(x,y, 'k--', label='fit')
+                axs[1].plot(x,y*scale[i], 'k--', label='fit')
             else:
                 y1 /= len(rdiffs)
                 y2 /= len(rdiffs)
