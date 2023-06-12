@@ -81,7 +81,7 @@ class validation_plots():
             fig, ax = plt.subplots()
             fig.dpi = self.dpi
             sperpbins = np.array(self.imputedetails['MAX_SPERPDIST'])
-            lims = np.nonzero(sperpbins[1:] - sperpbins[:-1]) + 1
+            lims = np.nonzero(sperpbins[1:] - sperpbins[:-1])[0] + 1
             next_lo_idx = 0
             for lim in lims:
                 ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['CLUSTERED_FRAC'][next_lo_idx:lim], '.--')
