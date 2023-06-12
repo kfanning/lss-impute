@@ -91,7 +91,7 @@ class validation_plots():
     def imputation_bins(self):
         return
 
-    def imputation_fits(self, catver='observed', mode='physical'):
+    def imputation_fits(self, catver='observed', mode='physical', extended=False):
         '''
         '''
         if mode == 'physical':
@@ -112,6 +112,10 @@ class validation_plots():
             pcatcol = 'angdist_n0'
             rcatcol = 'z_n0'
             backg = 0.01
+        nbins=50
+        if extended:
+            nbins = nbins*2
+            backg = backg*2
         cat = self.cats[catver]
         rdiffs = cat[rname] - cat[f'{rname.lower()}_n0']
         rmins = list(self.imputedetails[f'MIN_{rname}'])
@@ -140,8 +144,8 @@ class validation_plots():
             clusmask = (rdiffs < backg) & (rdiffs > -1*backg)
             clus = rdiffs[clusmask]
             back = rdiffs[~clusmask]
-            cbbins, cbedges = np.histogram(back, bins=50, density=False)
-            ccbins, ccedges = np.histogram(clus, bins=50, density=False)
+            cbbins, cbedges = np.histogram(back, bins=nbins, density=False)
+            ccbins, ccedges = np.histogram(clus, bins=nbins, density=False)
             y1 = cbbins
             y2 = ccbins
             if fitt[i] == 'gauss':

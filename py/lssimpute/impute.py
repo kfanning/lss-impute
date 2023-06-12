@@ -86,7 +86,7 @@ class ImputeModel():
             self.sperp_misbins = np.extract(maskb, self.sperp_misbins)
             self.sperp_edges = np.extract(maske, self.sperp_edges)
             self.sperp_clusbins = np.extract(maskb, self.sperp_clusbins)
-        else:
+        elif nbins>1:
             bins = np.linspace(0, 2. + 2./(nbins-1), nbins+1)
             bins[-1] = maxbin
             self.sperp_misbins, self.sperp_edges = np.histogram(self.misscat['sperp_n0'], bins=bins)
@@ -178,7 +178,7 @@ class ImputeModel():
             self.r_misbins = np.extract(mask, self.r_misbins)
             self.r_clusbins = np.extract(mask, self.r_clusbins)
             self.r_edges = np.extract(mask2, self.r_edges)
-        else:
+        elif nbins>1:
             r_bounds = self.cosmo.comoving_radial_distance(self.tracer_bounds)
             bdiff = r_bounds[1] - r_bounds[0]
             bins = np.linspace(r_bounds[0], r_bounds[1], nbins+1)

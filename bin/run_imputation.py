@@ -18,6 +18,7 @@ parser.add_argument('--fit', '-f', action='store_true', help='Set flag to use mo
 parser.add_argument('--radial_bins', '-rb', default=15, type=int, help='Number of radial bins to use')
 parser.add_argument('--perp_bins', '-pb', default=18, type=int, help='Number of perpendicular bins to use')
 parser.add_argument('--fit_type', '-ft', default='gauss', type=str, help='Type of fit to use (gauss, quad or lorentz)')
+parser.add_argument('--extend', '-e', action='store_true', help='Set flag to extend fitting range from +/- 22.5 to +/- 45')
 # add dir management
 # catdir (for base catalogs for reading, no writing)
 # temp dir (intermediate files like logging, nn cats, etc)
@@ -73,7 +74,7 @@ obs_nncat_s.write(os.path.join(stagedir, f'{uargs.tracer}_S_clustering.dat.fits'
 
 #run imputation
 impn = impute.ImputeModel(obs_nncat_n, mis_nncat_n, tracer=uargs.tracer)
-impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type)
+impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type, extended=uargs.extend)
 figs = impn.figs
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_model_bins_live.pdf'
 with PdfPages(filename) as pdf:
@@ -81,7 +82,7 @@ with PdfPages(filename) as pdf:
         pdf.savefig(fig)
         plt.close(fig)
 imps = impute.ImputeModel(obs_nncat_s, mis_nncat_s, tracer=uargs.tracer)
-imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type)
+imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type, extended=uargs.extend)
 figs = imps.figs
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_model_bins_live.pdf'
 with PdfPages(filename) as pdf:
