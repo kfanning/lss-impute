@@ -80,7 +80,12 @@ class validation_plots():
         if self.imputedetails is not None:
             fig, ax = plt.subplots()
             fig.dpi = self.dpi
-            ax.plot(self.imputedetails['BIN_NUM'], self.imputedetails['CLUSTERED_FRAC'], 'b.')
+            sperpbins = np.array(self.imputedetails['MAX_SPERPDIST'])
+            lims = np.find_nonzero(sperpbins[1:] - sperpbins[:-1]) + 1
+            next_lo_idx = 0
+            for lim in lims:
+                ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['CLUSTERED_FRAC'][next_lo_idx:lim], '.--')
+                next_lo_idx = lim
             ax.set_xlabel('Bin Number')
             ax.set_ylabel('Fraction of "clustered" galaxies')
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
@@ -114,8 +119,8 @@ class validation_plots():
             backg = 0.01
         nbins=50
         if extended:
-            nbins = nbins*2
-            #backg = backg*2
+            #nbins = nbins*2
+            backg = backg*2
         cat = self.cats[catver]
         rdiffs = cat[rname] - cat[f'{rname.lower()}_n0']
         rmins = list(self.imputedetails[f'MIN_{rname}'])
