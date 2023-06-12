@@ -498,7 +498,7 @@ class ImputeModel():
                 selclus = self.cluscat[(self.cluscat['r_n0'] > minr) & (self.cluscat['r_n0'] < maxr) & (self.cluscat['sperp_n0'] > minsperp) & (self.cluscat['sperp_n0'] < maxsperp)]# & (selectclus['Z'] > 0.4) & (selectclus['Z'] < 1.1)] #n1 is just cause the file has self as "n0" rather than a different object
                 selclus['rdiff'] = (selclus['R']-selclus['r_n0'])
 
-                selreg = self.same_reg_clus[(self.same_reg_clus['r_n0'] > minr) & (self.same_reg_clus['r_n0'] < maxr) & (self.same_reg_clus['sperp_n0'] > minsperp) & (self.cluscat['sperp_n0'] < maxsperp)]# & (selectclus['Z'] > 0.4) & (selectclus['Z'] < 1.1)] #n1 is just cause the file has self as "n0" rather than a different object
+                selreg = self.same_reg_clus[(self.same_reg_clus['r_n0'] > minr) & (self.same_reg_clus['r_n0'] < maxr) & (self.same_reg_clus['sperp_n0'] > minsperp) & (self.same_reg_clus['sperp_n0'] < maxsperp)]# & (selectclus['Z'] > 0.4) & (selectclus['Z'] < 1.1)] #n1 is just cause the file has self as "n0" rather than a different object
                 selreg['rdiff'] = (selreg['R']-selreg['r_n0'])
                 #Seperate cluster/background cutoff is just +/- 0.01 for now (by inspection :))
                 #backg = 0.01
