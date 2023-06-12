@@ -161,7 +161,7 @@ class validation_plots():
                     params = (amp[i], sig[i], slope[i], intercept[i], quad[i])
                 else:
                     params = (amp[i], sig[i], slope[i], intercept[i])
-                x = np.linspace(np.min(clus), np.max(clus), 50)
+                x = np.linspace(np.min(clus), np.max(clus), 200)
                 y = model(x, params)
                 axs[1].plot(x,y, 'k--', label='fit')
             else:

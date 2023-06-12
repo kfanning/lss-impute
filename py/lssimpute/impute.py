@@ -512,7 +512,7 @@ class ImputeModel():
                 errs = []
                 ress = []
                 for f in ft:
-                    res, end_err = self._fit(clus_clus['rdiff'], fit_type=f)
+                    res, end_err = self._fit(clus_clus['rdiff'], fit_type=f, nbins=nbins)
                     errs.append(end_err)
                     ress.append(res)
                     print(f'Fit: {f}, end error/dof: {end_err:3f}')
@@ -578,7 +578,7 @@ class ImputeModel():
                 fig.suptitle(f'bin: {i+(j*(len(self.r_edges)-1))} / {minr:.3f}{runit} < {rname} < {maxr:.3f}{runit}, {minsperp:.3f}{perpunit} < {perpname} < {maxsperp:.3f}{perpunit}')
                 axs[0].set_ylabel('fraction of galaxies in bin')
                 axs[0].set_title('"Background" Pairs')
-                x = np.linspace(np.min(clus_clus['rdiff']), np.max(clus_clus['rdiff']), 50)
+                x = np.linspace(np.min(clus_clus['rdiff']), np.max(clus_clus['rdiff']), nbins)
                 y = model(x, res.x)
                 axs[1].plot(x,y, 'k-', label='fit')
                 axs[0].hist(cbedges[:-1], cbedges, weights=cbbins, color='b')
@@ -615,9 +615,9 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
-    def _fit(self, data, fit_type='gauss'):
+    def _fit(self, data, fit_type='gauss', nbins=50):
         #width = bins[1] - bins[0]
-        counts, bins = np.histogram(data, bins=50, density=False)
+        counts, bins = np.histogram(data, bins=nbins, density=False)
         params_g = (np.max(counts), np.std(data), 0, 0)
         bounds = [(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])]
         if fit_type == 'gauss':
