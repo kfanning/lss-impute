@@ -624,7 +624,7 @@ class ImputeModel():
                 else:
                     quad.append(0)
                 fitt.append(fit_choice)
-        self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, fitfrac, n_obsclus, n_obsback, n_misclus, n_misback, amp, sig, slope, intercept, quad, fitt, error_fit], names=names)
+        self.impute_details = Table([binnum, minrs, maxrs, minsperps, maxsperps, nominalfrac, fitfrac, n_obsclus, n_obsback, n_misclus, n_misback, amp, sig, slope, intercept, quad, fitt, error_fit, reg_frac], names=names)
         #mistab.write('impute_model_20230224_5S.fits', format='fits', overwrite=True)
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
