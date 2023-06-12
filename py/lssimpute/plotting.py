@@ -115,7 +115,7 @@ class validation_plots():
         nbins=50
         if extended:
             nbins = nbins*2
-            backg = backg*2
+            #backg = backg*2
         cat = self.cats[catver]
         rdiffs = cat[rname] - cat[f'{rname.lower()}_n0']
         rmins = list(self.imputedetails[f'MIN_{rname}'])
