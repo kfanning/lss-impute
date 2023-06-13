@@ -203,8 +203,8 @@ class validation_plots():
             back = rdiffs[~clusmask]
             cbbins, cbedges = np.histogram(back, bins=nbins, density=False)
             ccbins, ccedges = np.histogram(clus, bins=nbins, density=False)
-            c_width = ccbins[1] - ccbins[0]
-            b_width = cbbins[1] - cbbins[0]
+            c_width = ccedges[1] - ccedges[0]
+            b_width = cbedges[1] - cbedges[0]
             y1 = cbbins/b_width
             y2 = ccbins/c_width # fit is to "density" of galaxies, not raw counts
             if fitt[i] == 'gauss':
