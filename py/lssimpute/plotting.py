@@ -86,6 +86,8 @@ class validation_plots():
             for lim in lims:
                 ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['CLUSTERED_FRAC'][next_lo_idx:lim], '.--')
                 next_lo_idx = lim
+            #plot the last seperation
+            ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:], self.imputedetails['CLUSTERED_FRAC'][next_lo_idx:], '.--')
             ax.set_xlabel('Bin Number')
             ax.set_ylabel('Fraction of "clustered" galaxies')
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
@@ -103,6 +105,8 @@ class validation_plots():
             for lim in lims:
                 ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_WIDTH'][next_lo_idx:lim], '.--')
                 next_lo_idx = lim
+            #plot the last seperation
+            ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:], self.imputedetails['FIT_WIDTH'][next_lo_idx:], '.--')
             ax.set_xlabel('Bin Number')
             ax.set_ylabel('Width of fit')
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
@@ -120,6 +124,8 @@ class validation_plots():
             for lim in lims:
                 ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_SLOPE'][next_lo_idx:lim], '.--')
                 next_lo_idx = lim
+            #plot the last seperation
+            ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:], self.imputedetails['FIT_SLOPE'][next_lo_idx:], '.--')
             ax.set_xlabel('Bin Number')
             ax.set_ylabel('Slope of fit')
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
@@ -137,6 +143,8 @@ class validation_plots():
             for lim in lims:
                 ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_INTERCEPT'][next_lo_idx:lim], '.--')
                 next_lo_idx = lim
+            #plot the last seperation
+            ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:], self.imputedetails['FIT_INTERCEPT'][next_lo_idx:], '.--')
             ax.set_xlabel('Bin Number')
             ax.set_ylabel('Intercept of fit')
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
