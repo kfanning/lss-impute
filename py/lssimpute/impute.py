@@ -590,16 +590,18 @@ class ImputeModel():
                 fig, axs = plt.subplots(1,2)#, sharey=True)
                 fig.dpi=200
                 fig.suptitle(f'bin: {i+(j*(len(self.r_edges)-1))} / {minr:.3f}{runit} < {rname} < {maxr:.3f}{runit}, {minsperp:.3f}{perpunit} < {perpname} < {maxsperp:.3f}{perpunit}')
-                axs[0].set_ylabel('fraction of galaxies in bin')
+                axs[0].set_ylabel('Density of galaxies in bin')
                 axs[0].set_title('"Background" Pairs')
                 x = np.linspace(np.min(clus_clus['rdiff']), np.max(clus_clus['rdiff']), nbins)
                 y = model(x, res.x)
                 axs[1].plot(x,y, 'k-', label='fit')
-                axs[0].hist(cbedges[:-1], cbedges, weights=cbbins, color='b')
+                back_width = cbedges[1] - cbedges[0] #need to  fit to density, think reimann sum! or explaination in notebook
+                axs[0].hist(cbedges[:-1], cbedges, weights=cbbins/back_width, color='b')
                 axs[0].set_xlabel(f'{rname} diff ({runit})')
 
                 axs[1].set_title('"Clustered" Pairs')
-                axs[1].hist(ccedges[:-1], ccedges, weights=ccbins, color='g')
+                clus_width = ccedges[1] - ccedges[0]
+                axs[1].hist(ccedges[:-1], ccedges, weights=ccbins/ccedges, color='g')
                 axs[1].set_xlabel(f'{rname} diff ({runit})')
                 self.figs.append(fig)
 
@@ -632,7 +634,10 @@ class ImputeModel():
     def _fit(self, data, fit_type='gauss', nbins=50):
         #width = bins[1] - bins[0]
         counts, bins = np.histogram(data, bins=nbins, density=False)
-        params_g = (np.max(counts), 5, 0, 0)
+        x = (bins[1:] + bins[:-1])/2
+        width = bins[1] - bins[0]
+        y_data = counts/width #MUST fit to density, not total! Think Reimann sum!
+        params_g = (np.max(y_data), 5, 0, 0)
         bounds = [(0, 2*params_g[0]), (0.0001, 5*params_g[1]), (None, None), (0, 2*params_g[0])]
         if fit_type == 'gauss':
             objective = self.error
@@ -646,8 +651,6 @@ class ImputeModel():
             objective = self.error_quad_lorentz
             bounds.append((None, None))
             params_g = (np.max(counts), np.std(data), 0, 0, 0)
-        x = (bins[1:] + bins[:-1])/2
-        y_data = counts#/width
         tol = 0.0000001
         print(params_g)
         res = scipy.optimize.minimize(objective, params_g, args=[y_data, x], bounds=bounds, tol=tol)

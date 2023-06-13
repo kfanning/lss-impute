@@ -203,8 +203,10 @@ class validation_plots():
             back = rdiffs[~clusmask]
             cbbins, cbedges = np.histogram(back, bins=nbins, density=False)
             ccbins, ccedges = np.histogram(clus, bins=nbins, density=False)
-            y1 = cbbins
-            y2 = ccbins
+            c_width = ccbins[1] - ccbins[0]
+            b_width = cbbins[1] - cbbins[0]
+            y1 = cbbins/b_width
+            y2 = ccbins/c_width # fit is to "density" of galaxies, not raw counts
             if fitt[i] == 'gauss':
                 model = ImputeModel.model
             elif fitt[i] == 'lorentz':
