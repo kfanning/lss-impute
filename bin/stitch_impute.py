@@ -10,7 +10,7 @@ parser.add_argument('--survey', '-s', default='y1mock', help='Survey to use (typ
 parser.add_argument('--version', '-v', default=0, help='catalog version, for mocks this is mock number')
 parser.add_argument('--overwrite', '-o', action='store_true', help='Set flag to allow overwriting of existing files')
 parser.add_argument('--impversion', '-i', default=None, help='override version for imputation, default None == same as version')
-parser.add_argument('--cut', '-c', action='store_true', help='Set flag to cut stiched together catalog to redshift range')
+parser.add_argument('--cut', '-c', action='store_true', help='Set flag to cut stitched together catalog to redshift range')
 
 # add dir management
 # catdir (for base catalogs for reading, no writing)
@@ -37,9 +37,9 @@ imps = Table.read(os.path.join(impute_dir, f'{uargs.tracer}_S_clustering.dat.fit
 
 stitchedn = vstack([clusn, impn], join_type='inner')
 if uargs.cut:
-    stichedn = stichedn[(stitchedn['Z'] > zrange[uargs.tracer][0]) & (stitchedn['Z'] < zrange[uargs.tracer][1])]
+    stitchedn = stitchedn[(stitchedn['Z'] > zrange[uargs.tracer][0]) & (stitchedn['Z'] < zrange[uargs.tracer][1])]
 stitchedn.write(os.path.join(stitch_dir, f'{uargs.tracer}_N_clustering.dat.fits'))
 stitcheds = vstack([cluss, imps], join_type='inner')
 if uargs.cut:
-    sticheds = sticheds[(stitcheds['Z'] > zrange[uargs.tracer][0]) & (stitcheds['Z'] < zrange[uargs.tracer][1])]
+    stitcheds = stitcheds[(stitcheds['Z'] > zrange[uargs.tracer][0]) & (stitcheds['Z'] < zrange[uargs.tracer][1])]
 stitcheds.write(os.path.join(stitch_dir, f'{uargs.tracer}_S_clustering.dat.fits'))
