@@ -601,7 +601,7 @@ class ImputeModel():
 
                 axs[1].set_title('"Clustered" Pairs')
                 clus_width = ccedges[1] - ccedges[0]
-                axs[1].hist(ccedges[:-1], ccedges, weights=ccbins/ccedges, color='g')
+                axs[1].hist(ccedges[:-1], ccedges, weights=ccbins/clus_width, color='g')
                 axs[1].set_xlabel(f'{rname} diff ({runit})')
                 self.figs.append(fig)
 
