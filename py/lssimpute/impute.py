@@ -552,7 +552,7 @@ class ImputeModel():
 
                 if clusfrac_suppression is not None:
                     print(f'WARNING: clustered fraction is artificially supressed (factor = {clusfrac_suppression})! Ensure this is intentional!')
-                    clusfrac = clusfrac_suppression * clusfrac
+                    clus_frac = clusfrac_suppression * clus_frac
 
                 mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
                 while np.count_nonzero(mask) > 0:
