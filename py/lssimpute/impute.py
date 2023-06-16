@@ -739,13 +739,13 @@ class ImputeModel():
         '''
         return np.interp(r, self.cosmo._comoving_radial_distance, self.cosmo._z, left=None, right=None)
 
-    def run(self, clusfrac_override=None, skip_background=False, physical=True, rbins=15, angbins=18, fit=False, fit_type='gauss', extended=False):
+    def run(self, clusfrac_override=None, skip_background=False, physical=True, rbins=15, angbins=18, fit=False, fit_type='gauss', extended=False, clusfrac_suppression=None):
         if physical:
             # order here currently doesn't matter but it might be a good change to do a binning of sperp for each rbin
             self.bin_r(rbins)
             self.bin_sperp(angbins)
             if fit:
-                mistab = self.impute_physical_fit(clusfrac_override=clusfrac_override, skip_background=skip_background, fit_type=fit_type, extended=extended)
+                mistab = self.impute_physical_fit(clusfrac_override=clusfrac_override, skip_background=skip_background, fit_type=fit_type, extended=extended, clusfrac_suppression=clusfrac_suppression)
             else:
                 mistab = self.impute_physical(clusfrac_override=clusfrac_override, skip_background=skip_background)
         else:

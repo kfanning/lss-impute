@@ -82,7 +82,7 @@ else:
     cat2n = None
     cat2s = None
 impn = impute.ImputeModel(obs_nncat_n, mis_nncat_n, tracer=uargs.tracer, cluscat2=cat2n)
-impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type, extended=uargs.extend)
+impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type, extended=uargs.extend, clusfrac_suppression=uargs.clusfrac_factor)
 figs = impn.figs
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_N_model_bins_live.pdf'
 with PdfPages(filename) as pdf:
@@ -90,7 +90,7 @@ with PdfPages(filename) as pdf:
         pdf.savefig(fig)
         plt.close(fig)
 imps = impute.ImputeModel(obs_nncat_s, mis_nncat_s, tracer=uargs.tracer, cluscat2=cat2s)
-imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type, extended=uargs.extend)
+imps_cat = imps.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type, extended=uargs.extend, clusfrac_suppression=uargs.clusfrac_factor)
 figs = imps.figs
 filename = f'{stagedir}/{uargs.tracer}_{uargs.survey}_{uargs.version}_S_model_bins_live.pdf'
 with PdfPages(filename) as pdf:
