@@ -456,7 +456,7 @@ class ImputeModel():
         #fittab.write('model_fit_20220609.fits', format='fits', overwrite=True)
         return mistab
 
-    def impute_physical_fit(self, clusfrac_override=None, skip_background=True, fit_type='gauss', extended=False):
+    def impute_physical_fit(self, clusfrac_override=None, skip_background=True, fit_type='gauss', extended=False, clusfrac_suppression=None):
         fit_type = fit_type.lower()
         assert fit_type in ['gauss', 'lorentz', 'quad', 'dynamic'], f'Invalid fit_type {fit_type}'
 
@@ -549,6 +549,10 @@ class ImputeModel():
                     clus_frac = res.x[0]*res.x[1]*np.sqrt(2*np.pi)/len(selclus)
                 elif fit_choice in ['lorentz', 'quad_l']:
                     clus_frac = res.x[0]*res.x[1]*np.pi/len(selclus)
+
+                if clusfrac_suppression is not None:
+                    print(f'WARNING: clustered fraction is artificially supressed (factor = {clusfrac_suppression})! Ensure this is intentional!')
+                    clusfrac = clusfrac_suppression * clusfrac
 
                 mask = (mistab['r_n0'] < maxr) & (mistab['r_n0'] > minr) & (mistab['sperp_n0'] > minsperp) & (mistab['sperp_n0'] < maxsperp) & ((mistab['R'] < 0))# | (mistab['Z'] > maxz)) #ensure positive
                 while np.count_nonzero(mask) > 0:

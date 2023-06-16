@@ -20,6 +20,7 @@ parser.add_argument('--perp_bins', '-pb', default=18, type=int, help='Number of 
 parser.add_argument('--fit_type', '-ft', default='gauss', type=str, help='Type of fit to use (gauss, quad or lorentz)')
 parser.add_argument('--extend', '-e', action='store_true', help='Set flag to extend fitting range from +/- 22.5 to +/- 45')
 parser.add_argument('--stack_catalogs', '-sc', action='store_true', help='Set flag to do fits on both N and S stacked')
+parser.add_argument('--clusfrac_factor', '-cf', default=None, help='Set a float value to multiply the calculated clusfrac by. Default None.')
 # add dir management
 # catdir (for base catalogs for reading, no writing)
 # temp dir (intermediate files like logging, nn cats, etc)
