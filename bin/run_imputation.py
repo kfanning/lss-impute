@@ -83,6 +83,8 @@ else:
     cat2s = None
 if uargs.clusfrac_factor is not None:
     cf_factor = float(uargs.clusfrac_factor)
+else:
+    cf_factor=None
 impn = impute.ImputeModel(obs_nncat_n, mis_nncat_n, tracer=uargs.tracer, cluscat2=cat2n)
 impn_cat = impn.run(skip_background=uargs.nobackground, physical=uargs.physical, fit=uargs.fit, rbins=uargs.radial_bins, angbins=uargs.perp_bins, fit_type=uargs.fit_type, extended=uargs.extend, clusfrac_suppression=cf_factor)
 figs = impn.figs
