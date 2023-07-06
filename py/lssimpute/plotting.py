@@ -52,7 +52,7 @@ class validation_plots():
             bincounts, edges = np.histogram(self.cats[name][mask][col], range=(zlo,zhi), bins=nbins, density=True)
             ax.hist(self.cats[name][mask][col], bins=edges, color=self.colors[name], label=name, histtype='step', density=True)
         ax.legend()
-        ax.set_ylabel('normalized n(z)')
+        ax.set_ylabel('Normalized n(z)')
         ax.set_xlabel('z')
         #ax.set_yscale('log')
         #ax.set_ylim([-100,600])
@@ -83,13 +83,15 @@ class validation_plots():
             sperpbins = np.array(self.imputedetails['MAX_SPERPDIST'])
             lims = np.nonzero(sperpbins[1:] - sperpbins[:-1])[0] + 1
             next_lo_idx = 0
-            for lim in lims:
-                ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['CLUSTERED_FRAC'][next_lo_idx:lim], '.--')
-                next_lo_idx = lim
+            do_split = set(np.array(self.imputedetails['MIN_R'])) != 1
+            if do_split:
+                for lim in lims:
+                    ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['CLUSTERED_FRAC'][next_lo_idx:lim], '.--')
+                    next_lo_idx = lim
             #plot the last seperation
             ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:], self.imputedetails['CLUSTERED_FRAC'][next_lo_idx:], '.--')
             ax.set_xlabel('Bin Number')
-            ax.set_ylabel('Fraction of "clustered" galaxies')
+            ax.set_ylabel('Fraction of Clustered Galaxies')
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
             return fig
         else:
@@ -102,13 +104,15 @@ class validation_plots():
             sperpbins = np.array(self.imputedetails['MAX_SPERPDIST'])
             lims = np.nonzero(sperpbins[1:] - sperpbins[:-1])[0] + 1
             next_lo_idx = 0
-            for lim in lims:
-                ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_WIDTH'][next_lo_idx:lim], '.--')
-                next_lo_idx = lim
+            do_split = set(np.array(self.imputedetails['MIN_R'])) != 1
+            if do_split:
+                for lim in lims:
+                    ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_WIDTH'][next_lo_idx:lim], '.--')
+                    next_lo_idx = lim
             #plot the last seperation
             ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:], self.imputedetails['FIT_WIDTH'][next_lo_idx:], '.--')
             ax.set_xlabel('Bin Number')
-            ax.set_ylabel('Width of fit')
+            ax.set_ylabel('Width of Fit')
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
             return fig
         else:
@@ -121,13 +125,15 @@ class validation_plots():
             sperpbins = np.array(self.imputedetails['MAX_SPERPDIST'])
             lims = np.nonzero(sperpbins[1:] - sperpbins[:-1])[0] + 1
             next_lo_idx = 0
-            for lim in lims:
-                ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_SLOPE'][next_lo_idx:lim], '.--')
-                next_lo_idx = lim
+            do_split = set(np.array(self.imputedetails['MIN_R'])) != 1
+            if do_split:
+                for lim in lims:
+                    ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_SLOPE'][next_lo_idx:lim], '.--')
+                    next_lo_idx = lim
             #plot the last seperation
             ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:], self.imputedetails['FIT_SLOPE'][next_lo_idx:], '.--')
             ax.set_xlabel('Bin Number')
-            ax.set_ylabel('Slope of fit')
+            ax.set_ylabel('Slope of Fit')
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
             return fig
         else:
@@ -140,13 +146,15 @@ class validation_plots():
             sperpbins = np.array(self.imputedetails['MAX_SPERPDIST'])
             lims = np.nonzero(sperpbins[1:] - sperpbins[:-1])[0] + 1
             next_lo_idx = 0
-            for lim in lims:
-                ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_INTERCEPT'][next_lo_idx:lim], '.--')
-                next_lo_idx = lim
+            do_split = set(np.array(self.imputedetails['MIN_R'])) != 1
+            if do_split:
+                for lim in lims:
+                    ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:lim], self.imputedetails['FIT_INTERCEPT'][next_lo_idx:lim], '.--')
+                    next_lo_idx = lim
             #plot the last seperation
             ax.plot(self.imputedetails['BIN_NUM'][next_lo_idx:], self.imputedetails['FIT_INTERCEPT'][next_lo_idx:], '.--')
             ax.set_xlabel('Bin Number')
-            ax.set_ylabel('Intercept of fit')
+            ax.set_ylabel('Intercept of Fit')
             ax.set_title(f'{self.survey} {self.tracer} {self.region}')
             return fig
         else:
@@ -202,7 +210,11 @@ class validation_plots():
             rdiffs = cat[mask][rname] - cat[mask][f'{rname.lower()}_n0']
             fig, axs = plt.subplots(1,2)#, sharey=True)
             fig.dpi=self.dpi
-            fig.suptitle(f'bin: {binnum[i]} / {rmins[i]:.3f}{runit} < {rname} < {rmaxs[i]:.3f}{runit}, {pmins[i]:.3f}{perpunit} < {perpname} < {pmaxs[i]:.3f}{perpunit}')
+            r_title = f'{rmins[i]:.1f}{runit} < {rname} < {rmaxs[i]:.1f}{runit},'
+            if len(set(rmins))==1:
+                rtitle=''
+            p_title = f'{pmins[i]:.1f}{perpunit} < {perpname} < {pmaxs[i]:.1f}{perpunit}'
+            fig.suptitle(f'bin: {binnum[i]} | {r_title} {p_title}')
             axs[0].set_ylabel('fraction of galaxies in bin')
             axs[0].set_title('"Background" Pairs')
             
